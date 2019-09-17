@@ -10,7 +10,7 @@ See COPYING and COPYING.LESSER for license details.
 """
 
 # cython: profile=False
-from detector cimport *
+from .detector cimport *
 from methods import  normalize
 from numpy.math cimport PI
 

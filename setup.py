@@ -39,7 +39,8 @@ for dirpath, dirnames, filenames in os.walk("singleeyefitter"):
     for filename in [f for f in filenames if f.endswith(".h")]:
         dependencies.append(os.path.join(dirpath, filename))
 
-shared_cpp_include_path = "../../shared_cpp/include"
+root_dir_include_path = "."
+shared_cpp_include_path = "shared_cpp/include"
 singleeyefitter_include_path = "singleeyefitter/"
 
 
@@ -65,6 +66,7 @@ if platform.system() == "Windows":
     ]
 
     include_dirs = [spec[0] for spec in lib_spec]
+    include_dirs.append(root_dir_include_path)
     include_dirs.append(shared_cpp_include_path)
     include_dirs.append(singleeyefitter_include_path)
     xtra_obj2d = [spec[1] for spec in lib_spec]
@@ -109,6 +111,7 @@ else:
         np.get_include(),
         "/usr/local/include/eigen3",
         "/usr/include/eigen3",
+        root_dir_include_path,
         shared_cpp_include_path,
         singleeyefitter_include_path,
     ] + opencv_include_dirs
@@ -120,7 +123,7 @@ extensions = [
     Extension(
         name="pupil_detectors.detector_2d",
         sources=[
-            "detector_2d.pyx",
+            "pupil_detectors/detector_2d.pyx",
             "singleeyefitter/ImageProcessing/cvx.cpp",
             "singleeyefitter/utils.cpp",
             "singleeyefitter/detectorUtils.cpp",
