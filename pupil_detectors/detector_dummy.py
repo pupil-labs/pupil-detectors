@@ -8,12 +8,13 @@ Lesser General Public License (LGPL v3.0).
 See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
+from plugin import Plugin
 
 
-class Detector_Dummy:
+class Detector_Dummy(Plugin):
 
-    def __init__(*args, **kwargs):
-        pass
+    def __init__(g_pool, *args, **kwargs):
+        super().__init__(g_pool, *args, **kwargs)
 
     def detect(self, frame, *args, **kwargs):
         return None
