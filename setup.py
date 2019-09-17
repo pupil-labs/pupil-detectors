@@ -169,7 +169,8 @@ if __name__ == "__main__":
     setup(
         name="pupil_detectors",
         version="0.2",
-        url="https://github.com/pupil-labs/pupil",
+        package="pupil_detectors",
+        url="https://github.com/pupil-labs/pupil-detectors",
         author="Pupil Labs",
         author_email="info@pupil-labs.com",
         license="GNU",
