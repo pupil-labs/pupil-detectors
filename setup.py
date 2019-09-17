@@ -145,7 +145,7 @@ extensions = [
     Extension(
         name="pupil_detectors.detector_3d",
         sources=[
-            "detector_3d.pyx",
+            "pupil_detectors/detector_3d.pyx",
             "singleeyefitter/ImageProcessing/cvx.cpp",
             "singleeyefitter/utils.cpp",
             "singleeyefitter/detectorUtils.cpp",

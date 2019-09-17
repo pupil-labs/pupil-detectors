@@ -20,9 +20,9 @@ from cython.operator cimport dereference as deref
 from pyglui import ui
 from pyglui.cygl.utils import draw_gl_texture
 
-from coarse_pupil cimport center_surround
-from detector cimport *
-from detector_utils cimport *
+from .coarse_pupil cimport center_surround
+from .detector cimport *
+from .detector_utils cimport *
 from methods import Roi, normalize
 from gl_utils import (
     adjust_gl_view,
