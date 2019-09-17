@@ -9,12 +9,11 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-from plugin import Plugin
 
+class Detector_Dummy:
 
-class Detector_Dummy(Plugin):
-    def __init__(g_pool, *args, **kwargs):
-        super().__init__(g_pool)
+    def __init__(*args, **kwargs):
+        pass
 
     def detect(self, frame, *args, **kwargs):
         return None
