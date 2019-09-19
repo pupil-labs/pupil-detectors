@@ -124,9 +124,9 @@ else:
 
 extensions = [
     Extension(
-        name="pupil_detectors.detector_2d.detector_2d",
+        name="pupil_detectors.detector_2d.detector_2d_core",
         sources=[
-            "pupil_detectors/detector_2d/detector_2d.pyx",
+            "pupil_detectors/detector_2d/detector_2d_core.pyx",
             "singleeyefitter/ImageProcessing/cvx.cpp",
             "singleeyefitter/utils.cpp",
             "singleeyefitter/detectorUtils.cpp",
