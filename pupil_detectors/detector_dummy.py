@@ -8,28 +8,23 @@ Lesser General Public License (LGPL v3.0).
 See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
-from plugin import Plugin
+from .detector_base import Detector_Base
 
 
-class Detector_Dummy(Plugin):
+class Detector_Dummy(Detector_Base):
 
-    def __init__(g_pool, *args, **kwargs):
-        super().__init__(g_pool, *args, **kwargs)
+    ### Core
 
-    def detect(self, frame, *args, **kwargs):
+    def detector_properties(self) -> dict:
+        return {}
+
+    def detect(self, frame, user_roi, visualize, pause_video: bool = False):
         return None
+
+    ### GUI
 
     def visualize(self):
         pass
 
-    def get_settings(self):
-        return {}
-
     def on_resolution_change(self, *args, **kwargs):
         pass
-
-    def set_2d_detector_property(self, *args, **kwargs):
-        pass
-
-    def get_detector_properties(self):
-        return {}
