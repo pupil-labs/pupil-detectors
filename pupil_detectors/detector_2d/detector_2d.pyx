@@ -20,10 +20,10 @@ from cython.operator cimport dereference as deref
 from pyglui import ui
 from pyglui.cygl.utils import draw_gl_texture
 
-from . cimport detector
-from .detector cimport *
-from .detector_utils cimport *
-from .coarse_pupil cimport center_surround
+from pupil_detectors cimport detector
+from pupil_detectors.detector cimport *
+from pupil_detectors.detector_utils cimport *
+from pupil_detectors.coarse_pupil cimport center_surround
 
 from gl_utils import (
     adjust_gl_view,

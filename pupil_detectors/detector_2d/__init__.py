@@ -1,0 +1,1 @@
+from .detector_2d import Detector_2D, detector_2d_default_properties

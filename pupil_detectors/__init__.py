@@ -14,4 +14,4 @@ from .detector_3d import Detector_3D
 from .detector_dummy import Detector_Dummy
 
 # explicit import here for pyinstaller because it will not search .pyx source files.
-from pupil_detectors.visualizer_3d import Eye_Visualizer
+from .detector_3d import Eye_Visualizer
