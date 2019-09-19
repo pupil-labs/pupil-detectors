@@ -23,6 +23,7 @@ from pyglui.cygl.utils import draw_gl_texture
 from .coarse_pupil cimport center_surround
 from .detector cimport *
 from .detector_utils cimport *
+
 from methods import Roi, normalize
 from gl_utils import (
     adjust_gl_view,
@@ -32,7 +33,17 @@ from gl_utils import (
     make_coord_system_pixel_based,
 )
 from plugin import Plugin
+
+from pupil_detectors.detector_2d import detector_2d_default_properties
 from pupil_detectors.visualizer_3d import Eye_Visualizer
+
+
+def detector_3d_default_properties():
+    properties = {}
+    properties["model_sensitivity"] = 0.997
+    properties["model_is_frozen"] = False
+    return properties
+
 
 cdef class Detector_3D:
 
@@ -70,39 +81,26 @@ cdef class Detector_3D:
         self.uniqueness = 'unique'
         self.icon_font = 'pupil_icons'
         self.icon_chr = chr(0xec19)
-        self.detectProperties2D = settings['2D_Settings'] if settings else {}
-        self.detectProperties3D = settings['3D_Settings'] if settings else {}
 
-        if not self.detectProperties2D:
-            self.detectProperties2D["coarse_detection"] = True
-            self.detectProperties2D["coarse_filter_min"] = 128
-            self.detectProperties2D["coarse_filter_max"] = 280
-            self.detectProperties2D["intensity_range"] = 23
-            self.detectProperties2D["blur_size"] = 5
-            self.detectProperties2D["canny_treshold"] = 160
-            self.detectProperties2D["canny_ration"] = 2
-            self.detectProperties2D["canny_aperture"] = 5
-            self.detectProperties2D["pupil_size_max"] = 100
-            self.detectProperties2D["pupil_size_min"] = 10
-            self.detectProperties2D["strong_perimeter_ratio_range_min"] = 0.8
-            self.detectProperties2D["strong_perimeter_ratio_range_max"] = 1.1
-            self.detectProperties2D["strong_area_ratio_range_min"] = 0.6
-            self.detectProperties2D["strong_area_ratio_range_max"] = 1.1
-            self.detectProperties2D["contour_size_min"] = 5
-            self.detectProperties2D["ellipse_roundness_ratio"] = 0.1
-            self.detectProperties2D["initial_ellipse_fit_treshhold"] = 1.8
-            self.detectProperties2D["final_perimeter_ratio_range_min"] = 0.6
-            self.detectProperties2D["final_perimeter_ratio_range_max"] = 1.2
-            self.detectProperties2D["ellipse_true_support_min_dist"] = 2.5
-            self.detectProperties2D["support_pixel_ratio_exponent"] = 2.0
+        self.detectProperties2D = detector_2d_default_properties()
+        self.detectProperties3D = detector_3d_default_properties()
 
-
-        if not self.detectProperties3D:
-            self.detectProperties3D["model_sensitivity"] = 0.997
+        # Overwrite default 2D detector properties
+        self.detectProperties2D["strong_perimeter_ratio_range_min"] = 0.8
+        self.detectProperties2D["strong_area_ratio_range_min"] = 0.6
+        self.detectProperties2D["ellipse_roundness_ratio"] = 0.1
+        self.detectProperties2D["initial_ellipse_fit_treshhold"] = 1.8
+        self.detectProperties2D["final_perimeter_ratio_range_min"] = 0.6
+        self.detectProperties2D["final_perimeter_ratio_range_max"] = 1.2
+        self.detectProperties2D["ellipse_true_support_min_dist"] = 2.5
 
         # Never freeze model in the beginning to allow initial model fitting.
         self.detectProperties3D["model_is_frozen"] = False
 
+        if settings:
+            # Update 2d and 3d properties with saved values from legacy format
+            self.detectProperties2D.update(settings.get("2D_Settings", {}))
+            self.detectProperties3D.update(settings.get("3D_Settings", {}))
     def get_settings(self):
         return {'2D_Settings': self.detectProperties2D , '3D_Settings' : self.detectProperties3D }
 
