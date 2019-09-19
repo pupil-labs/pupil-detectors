@@ -24,6 +24,7 @@ from . cimport detector
 from .detector cimport *
 from .detector_utils cimport *
 from .coarse_pupil cimport center_surround
+
 from gl_utils import (
     adjust_gl_view,
     clear_gl_screen,
@@ -33,6 +34,32 @@ from gl_utils import (
 )
 from methods import Roi, normalize
 from plugin import Plugin
+
+
+def detector_2d_default_properties():
+    properties = {}
+    properties["coarse_detection"] = True
+    properties["coarse_filter_min"] = 128
+    properties["coarse_filter_max"] = 280
+    properties["intensity_range"] = 23
+    properties["blur_size"] = 5
+    properties["canny_treshold"] = 160
+    properties["canny_ration"] = 2
+    properties["canny_aperture"] = 5
+    properties["pupil_size_max"] = 100
+    properties["pupil_size_min"] = 10
+    properties["strong_perimeter_ratio_range_min"] = 0.6
+    properties["strong_perimeter_ratio_range_max"] = 1.1
+    properties["strong_area_ratio_range_min"] = 0.8
+    properties["strong_area_ratio_range_max"] = 1.1
+    properties["contour_size_min"] = 5
+    properties["ellipse_roundness_ratio"] = 0.09
+    properties["initial_ellipse_fit_treshhold"] = 4.3
+    properties["final_perimeter_ratio_range_min"] = 0.5
+    properties["final_perimeter_ratio_range_max"] = 1.0
+    properties["ellipse_true_support_min_dist"] = 3.0
+    properties["support_pixel_ratio_exponent"] = 2.0
+    return properties
 
 
 cdef class Detector_2D:
@@ -64,31 +91,12 @@ cdef class Detector_2D:
         self.uniqueness = 'unique'
         self.icon_font = 'pupil_icons'
         self.icon_chr = chr(0xec18)
-        self.detectProperties = settings or {}
         self.coarseDetectionPreviousWidth = -1
         self.coarseDetectionPreviousPosition =  (0,0)
-        if not self.detectProperties:
-            self.detectProperties["coarse_detection"] = True
-            self.detectProperties["coarse_filter_min"] = 128
-            self.detectProperties["coarse_filter_max"] = 280
-            self.detectProperties["intensity_range"] = 23
-            self.detectProperties["blur_size"] = 5
-            self.detectProperties["canny_treshold"] = 160
-            self.detectProperties["canny_ration"] = 2
-            self.detectProperties["canny_aperture"] = 5
-            self.detectProperties["pupil_size_max"] = 100
-            self.detectProperties["pupil_size_min"] = 10
-            self.detectProperties["strong_perimeter_ratio_range_min"] = 0.6
-            self.detectProperties["strong_perimeter_ratio_range_max"] = 1.1
-            self.detectProperties["strong_area_ratio_range_min"] = 0.8
-            self.detectProperties["strong_area_ratio_range_max"] = 1.1
-            self.detectProperties["contour_size_min"] = 5
-            self.detectProperties["ellipse_roundness_ratio"] = 0.09
-            self.detectProperties["initial_ellipse_fit_treshhold"] = 4.3
-            self.detectProperties["final_perimeter_ratio_range_min"] = 0.5
-            self.detectProperties["final_perimeter_ratio_range_max"] = 1.0
-            self.detectProperties["ellipse_true_support_min_dist"] = 3.0
-            self.detectProperties["support_pixel_ratio_exponent"] = 2.0
+
+        self.detectProperties = detector_2d_default_properties()
+        if settings:
+            self.detectProperties.update(settings)
 
     def get_settings(self):
         return self.detectProperties
