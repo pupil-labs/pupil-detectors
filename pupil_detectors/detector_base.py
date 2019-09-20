@@ -1,41 +1,28 @@
 import abc
 import typing as T
 
-from plugin import Plugin
 
+class PupilDetector(abc.ABC):
 
-class Detector_Base(abc.ABC, Plugin):
+    ##### Legacy API
 
-    ### Core
+    def set_2d_detector_property(self, name: str, value: T.Any):
+        raise TypeError(f"2d properties not available for detectior: {type(self)}")
 
-    @abc.abstractmethod
-    def detector_properties(self) -> dict:
-        pass
+    def set_3d_detector_property(self, name: str, value: T.Any):
+        raise TypeError(f"3d properties not available for detectior: {type(self)}")
 
-    @abc.abstractmethod
-    def detect(self, frame, user_roi, visualize, pause_video: bool = False):
-        pass
-
-    ### GUI
+    ##### Core API
 
     @abc.abstractmethod
-    def visualize(self):
+    def detect(self, frame, user_roi, visualize, pause_video: bool = False, **kwargs):
         pass
 
     @abc.abstractmethod
-    def on_resolution_change(self, *args, **kwargs):
+    def namespaced_detector_properties(self) -> dict:
         pass
 
-    ### Legacy
-
-    def get_settings(self):
-        return self.detector_properties
-
-    def get_detector_properties(self):
-        return self.detector_properties
-
-    def set_2d_detector_property(self, name, value):
+    @abc.abstractmethod
+    def on_resolution_change(self, old_size, new_size):
         pass
 
-    def set_3d_detector_property(self, name, value):
-        pass
