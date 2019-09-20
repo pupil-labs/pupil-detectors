@@ -1,22 +1,18 @@
-import sys
-import math
-import numpy as np
-import cv2
+from pupil_detectors.detector_base import PupilDetector
 
-from .detector_2d_core import Detector_2D_Core
+from .detector_2d_core import Detector2DCore
 
-from pyglui import ui
-from pyglui.cygl.utils import draw_gl_texture
-import glfw
-from gl_utils import (
-    adjust_gl_view,
-    clear_gl_screen,
-    basic_gl_setup,
-    make_coord_system_norm_based,
-    make_coord_system_pixel_based,
-)
-from methods import Roi, normalize
-from plugin import Plugin
+
+DETECTOR_2D_PROPERTIES_NAMESPACE = "2d"
+
+def detector_2d_properties_from_namespaced_properties(namespaced_properties: dict) -> dict:
+    properties = detector_2d_default_properties()
+    properties.update(namespaced_properties.get(DETECTOR_2D_PROPERTIES_NAMESPACE, {}))
+    return properties
+
+
+def detector_2d_properties_to_namespaced_properties(detector_2d_properties: dict) -> dict:
+    return {DETECTOR_2D_PROPERTIES_NAMESPACE: detector_2d_properties}
 
 
 def detector_2d_default_properties():
@@ -45,159 +41,24 @@ def detector_2d_default_properties():
     return properties
 
 
-class Detector_2D:
+class Detector2D(Detector2DCore, PupilDetector):
+    # TODO: Adopt PupilDetector interface
 
-    def __init__(self, g_pool = None, settings = None):
-        #debug window
-        self._window = None
-        self.windowShouldOpen = False
-        self.windowShouldClose = False
-        self.g_pool = g_pool
-        self.uniqueness = 'unique'
-        self.icon_font = 'pupil_icons'
-        self.icon_chr = chr(0xec18)
+    def __init__(self, namespaced_properties = {}):
+        detector_2d_properties = detector_2d_properties_from_namespaced_properties(namespaced_properties)
+        super().__init__(detector_2d_properties)
 
-        detector_2d_properties = detector_2d_default_properties()
-        if settings:
-            detector_2d_properties.update(settings)
-        
-        self.detector_core = Detector_2D_Core(detector_2d_properties)
+    ##### Legacy API
 
-    @property
-    def detector_properties_2d(self) -> dict:
-        return self.detector_core.get_2d_detector_properties()
+    # set_2d_detector_property implemented by Detector_2D_Core
 
-    @property
-    def debug_image(self):
-        return self.detector_core.debugImage
+    ##### Core API
+
+    # detect implemented by Detector_2D_Core
+
+    def namespaced_detector_properties(self) -> dict:
+        return detector_2d_properties_to_namespaced_properties(self.detector_2d_properties)
 
     def on_resolution_change(self, old_size, new_size):
         self.detector_properties_2d["pupil_size_max"] *= new_size[0] / old_size[0]
         self.detector_properties_2d["pupil_size_min"] *= new_size[0] / old_size[0]
-
-    def detect(self, frame, user_roi, visualize, pause_video = False):
-        if self.windowShouldOpen:
-            self.open_window((frame.width,frame.height))
-        if self.windowShouldClose:
-            self.close_window()
-
-        return self.detector_core.detect(
-            frame,
-            user_roi,
-            visualize,
-            pause_video,
-            use_debugImage=self._window != None
-        )
-
-    ##### Legacy API
-
-    def get_settings(self):
-        return self.detector_properties_2d
-
-    def set_2d_detector_property(self, name, value):
-        self.detector_core.set_2d_detector_property(name, value)
-
-    def get_detector_properties(self):
-        return {"2d": self.detector_properties_2d}
-
-    ##### Plugin API
-
-    @property
-    def pretty_class_name(self):
-        return 'Pupil Detector 2D'
-
-    def init_ui(self):
-        Plugin.add_menu(self)
-        self.menu.label = self.pretty_class_name
-        self.menu_icon.label_font = 'pupil_icons'
-        info = ui.Info_Text("Switch to the algorithm display mode to see a visualization of pupil detection parameters overlaid on the eye video. "\
-                                +"Adjust the pupil intensity range so that the pupil is fully overlaid with blue. "\
-                                +"Adjust the pupil min and pupil max ranges (red circles) so that the detected pupil size (green circle) is within the bounds.")
-        self.menu.append(info)
-        #self.menu.append(ui.Switch('coarse_detection',self.detector_properties_2d,label='Use coarse detection'))
-        self.menu.append(ui.Slider('intensity_range',self.detector_properties_2d,label='Pupil intensity range',min=0,max=60,step=1))
-        self.menu.append(ui.Slider('pupil_size_min',self.detector_properties_2d,label='Pupil min',min=1,max=250,step=1))
-        self.menu.append(ui.Slider('pupil_size_max',self.detector_properties_2d,label='Pupil max',min=50,max=400,step=1))
-        self.menu.append(ui.Button('Open debug window',self.toggle_window))
-        #advanced_controls_menu = ui.Growing_Menu('Advanced Controls')
-        #advanced_controls_menu.append(ui.Slider('contour_size_min',self.detector_properties_2d,label='Contour min length',min=1,max=200,step=1))
-        #advanced_controls_menu.append(ui.Slider('ellipse_true_support_min_dist',self.detector_properties_2d,label='ellipse_true_support_min_dist',min=0.1,max=7,step=0.1))
-        #self.menu.append(advanced_controls_menu)
-
-    def deinit_ui(self):
-        Plugin.remove_menu(self)
-
-    def toggle_window(self):
-        if self._window:
-            self.windowShouldClose = True
-        else:
-            self.windowShouldOpen = True
-
-    def open_window(self,size):
-        if not self._window:
-            if 0: #we are not fullscreening
-                monitor = glfw.glfwGetMonitors()[self.monitor_idx]
-                mode = glfw.glfwGetVideoMode(monitor)
-                width, height= mode[0],mode[1]
-            else:
-                monitor = None
-                width, height = size
-
-            active_window = glfw.glfwGetCurrentContext()
-            self._window = glfw.glfwCreateWindow(width, height, "Pupil Detector Debug Window", monitor=monitor, share=active_window)
-            if not 0:
-                glfw.glfwSetWindowPos(self._window,200,0)
-
-            self.on_resize(self._window,width, height)
-
-            #Register callbacks
-            glfw.glfwSetWindowSizeCallback(self._window,self.on_resize)
-            # glfwSetKeyCallback(self._window,self.on_window_key)
-            glfw.glfwSetWindowCloseCallback(self._window,self.on_close)
-
-            # gl_state settings
-            glfw.glfwMakeContextCurrent(self._window)
-            basic_gl_setup()
-
-            # refresh speed settings
-            glfw.glfwSwapInterval(0)
-
-            glfw.glfwMakeContextCurrent(active_window)
-
-            self.windowShouldOpen = False
-
-    # window calbacks
-    def on_resize(self,window,w,h):
-        active_window = glfw.glfwGetCurrentContext()
-        glfw.glfwMakeContextCurrent(window)
-        adjust_gl_view(w,h)
-        glfw.glfwMakeContextCurrent(active_window)
-
-    def on_close(self,window):
-        self.windowShouldClose = True
-
-    def close_window(self):
-        if self._window:
-            active_window = glfw.glfwGetCurrentContext()
-            glfw.glfwDestroyWindow(self._window)
-            self._window = None
-            self.windowShouldClose = False
-            glfw.glfwMakeContextCurrent(active_window)
-
-    def gl_display_in_window(self,img):
-        active_window = glfw.glfwGetCurrentContext()
-        glfw.glfwMakeContextCurrent(self._window)
-        clear_gl_screen()
-        # gl stuff that will show on your plugin window goes here
-        make_coord_system_norm_based()
-        draw_gl_texture(img,interpolation=False)
-        glfw.glfwSwapBuffers(self._window)
-        glfw.glfwMakeContextCurrent(active_window)
-
-    def cleanup(self):
-        self.close_window() # if we change detectors, be sure debug window is also closed
-
-    def visualize(self):
-        #display the debug image in the window
-        if self._window:
-            self.gl_display_in_window(self.debugImage)
