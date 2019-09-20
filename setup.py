@@ -146,9 +146,9 @@ extensions = [
         language="c++",
     ),
     Extension(
-        name="pupil_detectors.detector_3d.detector_3d",
+        name="pupil_detectors.detector_3d.detector_3d_core",
         sources=[
-            "pupil_detectors/detector_3d/detector_3d.pyx",
+            "pupil_detectors/detector_3d/detector_3d_core.pyx",
             "singleeyefitter/ImageProcessing/cvx.cpp",
             "singleeyefitter/utils.cpp",
             "singleeyefitter/detectorUtils.cpp",
