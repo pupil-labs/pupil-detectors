@@ -3,19 +3,54 @@ import typing as T
 
 from pupil_detectors import PupilDetector
 
+from plugin import Plugin
 
-class PupilDetectorPlugin(PupilDetector):
 
-    # TODO: Fill out Plugin API
+class PupilDetectorPlugin(PupilDetector, Plugin):
+
+    ########## PupilDetectorPlugin API
 
     @property
     @abc.abstractmethod
     def pupil_detector(self) -> PupilDetector:
         pass
 
-    @abc.abstractmethod
+    ##### Plugin API
+
+    def __init__(self, g_pool):
+        super().__init__(g_pool=g_pool)
+
+    def init_ui(self):
+        super().init_ui()
+
     def gl_display(self):
-        pass
+        super().gl_display()
+
+    def recent_events(self, event):
+        super().recent_events(event)
+
+        frame = event.get("frame")
+        if not frame:
+            return
+
+        # TODO: Extract event handling logic from eye.py
+
+        # Pupil ellipse detection
+        frame["pupil_detection_result"] = self.detect(
+            frame=frame,
+            user_roi=self.g_pool.u_r,
+            visualize=self.g_pool.display_mode == "algorithm",
+        )
+
+    def on_notify(self, notification):
+        super().on_notify(notification)
+        # TODO: Extract notification handling logic from eye.py
+
+    def deinit_ui(self):
+        super().deinit_ui()
+
+    def cleanup(self):
+        super().cleanup()
 
     ########## PupilDetector API
 
