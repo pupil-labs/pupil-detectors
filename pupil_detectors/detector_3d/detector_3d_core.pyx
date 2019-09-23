@@ -23,7 +23,7 @@ cdef class Detector3DCore:
 
     # Python-space properties
     cdef readonly dict detectProperties2D, detectProperties3D #TODO: Rename to detector_properties_2d and detector_properties_3d
-    cdef readonly object pyResult3D #TODO: Rename to debug_result_3d
+    cdef readonly object debug_result
 
     # Cython-space properties
     cdef Detector2D* detector2DPtr
@@ -158,6 +158,6 @@ cdef class Detector3DCore:
         pyResult = convertTo3DPythonResult(cpp3DResult , frame )
 
         if is_debugging_enabled:
-            self.pyResult3D = prepareForVisualization3D(cpp3DResult)
+            self.debug_result = prepareForVisualization3D(cpp3DResult)
 
         return pyResult

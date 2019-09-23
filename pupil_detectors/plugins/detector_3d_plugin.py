@@ -111,7 +111,7 @@ class Detector3DPlugin(PupilDetectorPlugin):
 
     def visualize(self):
         if self.debugVisualizer3D.window:
-            self.debugVisualizer3D.update_window(self.g_pool, self.pyResult3D)
+            self.debugVisualizer3D.update_window(self.g_pool, self.detector_3d.debug_result)
 
     def cleanup(self):
         self.debugVisualizer3D.close_window() # if we change detectors, be sure debug window is also closed
