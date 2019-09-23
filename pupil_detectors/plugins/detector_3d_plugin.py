@@ -21,7 +21,7 @@ class Detector3DPlugin(PupilDetectorPlugin):
     icon_chr = chr(0xec19)
 
     def __init__(self, g_pool = None, namespaced_properties = None, detector_3d: Detector3D = None):
-        self.g_pool = g_pool
+        super().__init__(g_pool=g_pool)
         self.detector_3d = detector_3d or Detector3D(namespaced_properties or {})
         #debug window
         self.debugVisualizer3D = Eye_Visualizer(g_pool, self.detector_3d.focal_length())
@@ -42,6 +42,16 @@ class Detector3DPlugin(PupilDetectorPlugin):
     @property
     def detector_properties_3d(self) -> dict:
         return self.detector_3d.detector_properties_3d
+
+    @property
+    def pupil_detector(self) -> PupilDetector:
+        return self.detector_3d
+
+    ### PupilDetectorPlugin API
+
+    @classmethod
+    def parse_pretty_class_name(cls) -> str:
+        return "Pupil Detector 3D"
 
     def init_ui(self):
         Plugin.add_menu(self)
@@ -89,16 +99,21 @@ class Detector3DPlugin(PupilDetectorPlugin):
         #advanced_controls_menu.append(ui.Slider('contour_size_min',self.detector_properties_2d,label='Contour min length',min=1,max=200,step=1))
         #sidebar.append(advanced_controls_menu)
 
-    @property
-    def pupil_detector(self) -> PupilDetector:
-        return self.detector_3d
+    def gl_display(self):
+        self.debug_window_update()
 
     def deinit_ui(self):
         Plugin.remove_menu(self)
 
-    @property
-    def pretty_class_name(self):
-        return 'Pupil Detector 3D'
+    def cleanup(self):
+        self.debug_window_close() # if we change detectors, be sure debug window is also closed
+
+    # Public
+
+    def reset_model(self):
+         self.detector_3d.reset_model()
+
+    # Debug window management
 
     @property
     def is_debug_window_open(self) -> bool:
@@ -121,12 +136,3 @@ class Detector3DPlugin(PupilDetectorPlugin):
     def debug_window_update(self):
         if self.is_debug_window_open:
             self.debugVisualizer3D.update_window(self.g_pool, self.detector_3d.debug_result)
-
-    def reset_model(self):
-         self.detector_3d.reset_model()
-
-    def gl_display(self):
-        self.debug_window_update()
-
-    def cleanup(self):
-        self.debug_window_close() # if we change detectors, be sure debug window is also closed
