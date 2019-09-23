@@ -17,12 +17,16 @@ class DetectorDummyPlugin(PupilDetectorPlugin):
 
     ########## PupilDetectorPlugin API
 
+    @classmethod
+    def parse_pretty_class_name(cls) -> str:
+        return "Dummy Detector"
+
+    def __init__(self, g_pool, *args, **kwargs):
+        super().__init__(g_pool=g_pool)
+
     @property
     def pupil_detector(self) -> PupilDetector:
         return self
-
-    def gl_display(self):
-        pass
 
     ########## PupilDetector API
 
