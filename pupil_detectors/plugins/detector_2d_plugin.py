@@ -20,7 +20,7 @@ class Detector2DPlugin(PupilDetectorPlugin):
     icon_chr = chr(0xec18)
 
     def __init__(self, g_pool = None, namespaced_properties = None, detector_2d: Detector2D = None):
-        self.g_pool = g_pool
+        super().__init__(g_pool=g_pool)
         self.detector_2d = detector_2d or Detector2D(namespaced_properties or {})
         #debug window
         self._window = None
@@ -32,9 +32,6 @@ class Detector2DPlugin(PupilDetectorPlugin):
     @property
     def detector_properties_2d(self) -> dict:
         return self.detector_2d.detector_properties_2d
-
-    def on_resolution_change(self, old_size, new_size):
-        self.detector_2d.on_resolution_change(old_size, new_size)
 
     def detect(self, frame, user_roi, visualize, pause_video = False):
         if self.windowShouldOpen:
@@ -52,14 +49,8 @@ class Detector2DPlugin(PupilDetectorPlugin):
 
     ##### Legacy API
 
-    def get_settings(self):
-        return self.detector_2d.get_settings()
-
     def set_2d_detector_property(self, name, value):
         self.detector_2d.set_2d_detector_property(name, value)
-
-    def get_detector_properties(self):
-        return self.detector_2d.get_detector_properties()
 
     ##### Plugin API
 
