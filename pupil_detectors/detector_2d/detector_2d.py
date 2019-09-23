@@ -57,7 +57,7 @@ class Detector2D(Detector2DCore, PupilDetector):
     # detect implemented by Detector_2D_Core
 
     def namespaced_detector_properties(self) -> dict:
-        return detector_2d_properties_to_namespaced_properties(self.detector_2d_properties)
+        return detector_2d_properties_to_namespaced_properties(self.detector_properties_2d)
 
     def on_resolution_change(self, old_size, new_size):
         self.detector_properties_2d["pupil_size_max"] *= new_size[0] / old_size[0]
