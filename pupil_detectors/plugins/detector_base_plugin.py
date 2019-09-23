@@ -36,7 +36,7 @@ class PupilDetectorPlugin(PupilDetector, Plugin):
         # TODO: Extract event handling logic from eye.py
 
         # Pupil ellipse detection
-        frame["pupil_detection_result"] = self.detect(
+        event["pupil_detection_result"] = self.detect(
             frame=frame,
             user_roi=self.g_pool.u_r,
             visualize=self.g_pool.display_mode == "algorithm",
