@@ -29,9 +29,9 @@ class Detector3D(Detector3DCore, PupilDetector):
 
     def __init__(self, namespaced_properties = {}):
         namespaced_properties = _upgade_legacy_namespaced_properties(namespaced_properties)
-        detector_2d_properties = detector_2d_properties_from_namespaced_properties(namespaced_properties)
-        detector_3d_properties = detector_3d_properties_from_namespaced_properties(namespaced_properties)
-        super().__init__(detector_2d_properties, detector_3d_properties)
+        detector_properties_2d = detector_2d_properties_from_namespaced_properties(namespaced_properties)
+        detector_properties_3d = detector_3d_properties_from_namespaced_properties(namespaced_properties)
+        super().__init__(detector_properties_2d, detector_properties_3d)
 
     ##### Legacy API
 
@@ -43,14 +43,13 @@ class Detector3D(Detector3DCore, PupilDetector):
 
     def namespaced_detector_properties(self) -> dict:
         properties = {}
-        properties.update(detector_2d_properties_to_namespaced_properties(self.detector_2d_properties))
-        properties.update(detector_3d_properties_to_namespaced_properties(self.detector_3d_properties))
+        properties.update(detector_2d_properties_to_namespaced_properties(self.detector_properties_2d))
+        properties.update(detector_3d_properties_to_namespaced_properties(self.detector_properties_3d))
         return properties
 
     def on_resolution_change(self, old_size, new_size):
-        # TODO: Rename properties attributes
-        self.detectProperties2D["pupil_size_max"] *= new_size[0] / old_size[0]
-        self.detectProperties2D["pupil_size_min"] *= new_size[0] / old_size[0]
+        self.detector_properties_2d["pupil_size_max"] *= new_size[0] / old_size[0]
+        self.detector_properties_3d["pupil_size_min"] *= new_size[0] / old_size[0]
 
 
 def _upgade_legacy_namespaced_properties(namespaced_properties: dict) -> dict:

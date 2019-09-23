@@ -22,7 +22,8 @@ from methods import Roi, normalize
 cdef class Detector3DCore:
 
     # Python-space properties
-    cdef readonly dict detectProperties2D, detectProperties3D #TODO: Rename to detector_properties_2d and detector_properties_3d
+    cdef readonly dict detector_properties_2d
+    cdef readonly dict detector_properties_3d
     cdef readonly object debug_result
 
     # Cython-space properties
@@ -45,21 +46,21 @@ cdef class Detector3DCore:
     def __init__(self, detector_properties_2d, detector_properties_3d):
 
         # Overwrite default 2D detector properties
-        self.detectProperties2D = {}
-        self.detectProperties2D["strong_perimeter_ratio_range_min"] = 0.8
-        self.detectProperties2D["strong_area_ratio_range_min"] = 0.6
-        self.detectProperties2D["ellipse_roundness_ratio"] = 0.1
-        self.detectProperties2D["initial_ellipse_fit_treshhold"] = 1.8
-        self.detectProperties2D["final_perimeter_ratio_range_min"] = 0.6
-        self.detectProperties2D["final_perimeter_ratio_range_max"] = 1.2
-        self.detectProperties2D["ellipse_true_support_min_dist"] = 2.5
-        self.detectProperties2D.update(detector_properties_2d)
+        self.detector_properties_2d = {}
+        self.detector_properties_2d["strong_perimeter_ratio_range_min"] = 0.8
+        self.detector_properties_2d["strong_area_ratio_range_min"] = 0.6
+        self.detector_properties_2d["ellipse_roundness_ratio"] = 0.1
+        self.detector_properties_2d["initial_ellipse_fit_treshhold"] = 1.8
+        self.detector_properties_2d["final_perimeter_ratio_range_min"] = 0.6
+        self.detector_properties_2d["final_perimeter_ratio_range_max"] = 1.2
+        self.detector_properties_2d["ellipse_true_support_min_dist"] = 2.5
+        self.detector_properties_2d.update(detector_properties_2d)
 
         # Overwrite default 3D detector properties
-        self.detectProperties3D = {}
+        self.detector_properties_3d = {}
         # Never freeze model in the beginning to allow initial model fitting.
-        self.detectProperties3D["model_is_frozen"] = False
-        self.detectProperties3D.update(detector_properties_3d)
+        self.detector_properties_3d["model_is_frozen"] = False
+        self.detector_properties_3d.update(detector_properties_3d)
 
     def __dealloc__(self):
       del self.detector2DPtr
@@ -76,10 +77,10 @@ cdef class Detector3DCore:
     ##### Legacy API
 
     def set_2d_detector_property(self, name, value):
-        set_detector_property(self.detectProperties2D, name, value)
+        set_detector_property(self.detector_properties_2d, name, value)
 
     def set_3d_detector_property(self, name, value):
-        set_detector_property(self.detectProperties3D, name, value)
+        set_detector_property(self.detector_properties_3d, name, value)
 
     ##### Core API
 
@@ -106,13 +107,13 @@ cdef class Detector3DCore:
         roi_height  = roi.get()[3] - roi.get()[1]
         cdef int[:,::1] integral
 
-        if self.detectProperties2D['coarse_detection'] and roi_width*roi_height > 320*240:
+        if self.detector_properties_2d['coarse_detection'] and roi_width*roi_height > 320*240:
             scale = 2 # half the integral image. boost up integral
             # TODO maybe implement our own Integral so we don't have to half the image
             user_roi_image = frame.gray[user_roi.view]
             integral = cv2.integral(user_roi_image[::scale,::scale])
-            coarse_filter_max = self.detectProperties2D['coarse_filter_max']
-            coarse_filter_min = self.detectProperties2D['coarse_filter_min']
+            coarse_filter_max = self.detector_properties_2d['coarse_filter_max']
+            coarse_filter_min = self.detector_properties_2d['coarse_filter_min']
             bounding_box , good_ones , bad_ones = center_surround( integral, coarse_filter_min/scale , coarse_filter_max/scale )
 
             if visualize:
@@ -148,12 +149,12 @@ cdef class Detector3DCore:
             roi.set((roi_x, roi_y, roi_x+roi_width, roi_y+roi_height))
 
         # every coordinates in the result are relative to the current ROI
-        cpp2DResultPtr =  self.detector2DPtr.detect(self.detectProperties2D, cv_image, cv_image_color, debug_image, Rect_[int](roi_x,roi_y,roi_width,roi_height), visualize , False ) #we don't use debug image in 3d model
+        cpp2DResultPtr =  self.detector2DPtr.detect(self.detector_properties_2d, cv_image, cv_image_color, debug_image, Rect_[int](roi_x,roi_y,roi_width,roi_height), visualize , False ) #we don't use debug image in 3d model
 
         deref(cpp2DResultPtr).timestamp = frame.timestamp #timestamp doesn't get set elsewhere and it is needt in detector3D
 
         ######### 3D Model Part ############
-        cdef Detector3DResult cpp3DResult  = self.detector3DPtr.updateAndDetect( cpp2DResultPtr , self.detectProperties3D, is_debugging_enabled)
+        cdef Detector3DResult cpp3DResult  = self.detector3DPtr.updateAndDetect( cpp2DResultPtr , self.detector_properties_3d, is_debugging_enabled)
 
         pyResult = convertTo3DPythonResult(cpp3DResult , frame )
 

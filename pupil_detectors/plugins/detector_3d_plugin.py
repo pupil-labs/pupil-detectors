@@ -37,11 +37,11 @@ class Detector3DPlugin(PupilDetectorPlugin):
 
     @property
     def detector_properties_2d(self) -> dict:
-        return self.detector_3d.detectProperties2D
+        return self.detector_3d.detector_properties_2d
 
     @property
     def detector_properties_3d(self) -> dict:
-        return self.detector_3d.detectProperties3D
+        return self.detector_3d.detector_properties_3d
 
     def init_ui(self):
         Plugin.add_menu(self)
