@@ -14,7 +14,7 @@ class PupilDetectorPlugin(PupilDetector):
         pass
 
     @abc.abstractmethod
-    def visualize(self):
+    def gl_display(self):
         pass
 
     ########## PupilDetector API

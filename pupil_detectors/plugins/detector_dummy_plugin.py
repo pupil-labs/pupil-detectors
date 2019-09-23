@@ -21,7 +21,7 @@ class DetectorDummyPlugin(PupilDetectorPlugin):
     def pupil_detector(self) -> PupilDetector:
         return self
 
-    def visualize(self):
+    def gl_display(self):
         pass
 
     ########## PupilDetector API

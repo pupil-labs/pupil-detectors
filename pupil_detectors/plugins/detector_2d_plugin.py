@@ -162,7 +162,7 @@ class Detector2DPlugin(PupilDetectorPlugin):
     def cleanup(self):
         self.close_window() # if we change detectors, be sure debug window is also closed
 
-    def visualize(self):
+    def gl_display(self):
         #display the debug image in the window
         if self._window:
             self.gl_display_in_window(self.detector_2d.debug_image)

@@ -125,7 +125,7 @@ class Detector3DPlugin(PupilDetectorPlugin):
     def reset_model(self):
          self.detector_3d.reset_model()
 
-    def visualize(self):
+    def gl_display(self):
         self.debug_window_update()
 
     def cleanup(self):
