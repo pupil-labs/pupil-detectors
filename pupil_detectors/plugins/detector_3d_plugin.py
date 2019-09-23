@@ -60,7 +60,7 @@ class Detector3DPlugin(PupilDetectorPlugin):
         #self.menu.append(ui.Slider('canny_ration',self.detector_properties_2d,min=1,max=4,step=1))
         info_3d = ui.Info_Text("Open the debug window to see a visualization of the 3D pupil detection." )
         self.menu.append(info_3d)
-        self.menu.append(ui.Button('Reset 3D model', self.reset_3D_Model ))
+        self.menu.append(ui.Button('Reset 3D model', self.reset_model))
         self.menu.append(ui.Button('Open debug window',self.toggle_window))
         model_sensitivity_slider = ui.Slider(
             'model_sensitivity',
@@ -100,8 +100,8 @@ class Detector3DPlugin(PupilDetectorPlugin):
     def pretty_class_name(self):
         return 'Pupil Detector 3D'
 
-    def reset_3D_Model(self):
-         self.detector3DPtr.reset()
+    def reset_model(self):
+         self.detector_3d.reset_model()
 
     def toggle_window(self):
         if not self.debugVisualizer3D.window:

@@ -70,6 +70,9 @@ cdef class Detector3DCore:
     def focal_length(self):
         return self.detector3DPtr.getFocalLength()
 
+    def reset_model(self):
+        self.detector3DPtr.reset()
+
     ##### Legacy API
 
     def set_2d_detector_property(self, name, value):
