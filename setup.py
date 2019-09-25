@@ -122,6 +122,20 @@ else:
     xtra_obj2d = []
     library_dirs = opencv_library_dirs
 
+extra_compile_args = [
+    "-D_USE_MATH_DEFINES",
+    "-std=c++11",
+    "-w",
+    "-O2",
+]
+if platform.system() == "Windows":
+    # TODO: This is a quick and dirty fix for:
+    # https://github.com/pupil-labs/pupil/issues/1331 We should investigate this more
+    # and fix it correctly at some point.
+    extra_compile_args += [
+        "-D_ENABLE_EXTENDED_ALIGNED_STORAGE",
+    ]
+
 extensions = [
     Extension(
         name="pupil_detectors.detector_2d.detector_2d_core",
@@ -135,12 +149,7 @@ extensions = [
         libraries=libs,
         library_dirs=library_dirs,
         extra_link_args=[],  # '-WL,-R/usr/local/lib'
-        extra_compile_args=[
-            "-D_USE_MATH_DEFINES",
-            "-std=c++11",
-            "-w",
-            "-O2",
-        ],  # ,'-O2'], #-w hides warnings
+        extra_compile_args=extra_compile_args,
         extra_objects=xtra_obj2d,
         depends=dependencies,
         language="c++",
@@ -159,12 +168,7 @@ extensions = [
         libraries=libs,
         library_dirs=library_dirs,
         extra_link_args=[],  # '-WL,-R/usr/local/lib'
-        extra_compile_args=[
-            "-D_USE_MATH_DEFINES",
-            "-std=c++11",
-            "-w",
-            "-O2",
-        ],  # ,'-O2'], #-w hides warnings
+        extra_compile_args=extra_compile_args,
         extra_objects=xtra_obj2d,
         depends=dependencies,
         language="c++",
