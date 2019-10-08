@@ -6,3 +6,4 @@ eye_model_3d.c
 build/
 __pycache__/
 *egg-info/
+*.pyd
