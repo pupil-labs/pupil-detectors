@@ -1,5 +1,0 @@
-from .detector_3d import Detector3D
-from .detector_3d import detector_3d_default_properties
-from .detector_3d import DETECTOR_3D_PROPERTIES_NAMESPACE
-from .detector_3d import detector_3d_properties_to_namespaced_properties
-from .detector_3d import detector_3d_properties_from_namespaced_properties

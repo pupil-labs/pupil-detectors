@@ -13,15 +13,14 @@ import cv2
 import numpy as np
 from cython.operator cimport dereference as deref
 
-from pupil_detectors cimport detector
 from pupil_detectors.detector cimport *
-from pupil_detectors.detector_utils cimport *
 from pupil_detectors.coarse_pupil cimport center_surround
 
-from methods import Roi, normalize
+from .. cimport cutils
+from ..utils import Roi
+from ..detector_base cimport DetectorBase
 
-
-cdef class Detector2DCore:
+cdef class Detector2DCore(DetectorBase):
 
     # Python-space properties
     cdef readonly dict detector_properties_2d
@@ -41,12 +40,12 @@ cdef class Detector2DCore:
         self.coarseDetectionPreviousPosition =  (0,0)
 
     def __dealloc__(self):
-      del self.thisptr
+        del self.thisptr
 
     ##### Legacy API
 
     def set_2d_detector_property(self, name, value):
-        set_detector_property(self.detector_properties_2d, name, value)
+        cutils.set_detector_property(self.detector_properties_2d, name, value)
 
     ##### Core API
 
@@ -123,6 +122,6 @@ cdef class Detector2DCore:
         # every coordinates in the result are relative to the current ROI
         cppResultPtr =  self.thisptr.detect(self.detector_properties_2d, frame_image, frameColor, debug_image, Rect_[int](roi_x,roi_y,roi_width,roi_height),  visualize , use_debug_image)
 
-        py_result = convertTo2DPythonResult( deref(cppResultPtr), frame , roi )
+        py_result = cutils.convertTo2DPythonResult( deref(cppResultPtr), frame , roi )
 
         return py_result

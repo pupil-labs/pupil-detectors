@@ -9,24 +9,6 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-# # monkey-patch for parallel compilation
-# def parallelCCompile(self, sources, output_dir=None, macros=None, include_dirs=None, debug=0, extra_preargs=None, extra_postargs=None, depends=None):
-#     # those lines are copied from distutils.ccompiler.CCompiler directly
-#     macros, objects, extra_postargs, pp_opts, build = self._setup_compile(output_dir, macros, include_dirs, sources, depends, extra_postargs)
-#     cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
-#     # parallel code
-#     N=4 # number of parallel compilations
-#     import multiprocessing.pool
-#     def _single_compile(obj):
-#         try: src, ext = build[obj]
-#         except KeyError: return
-#         self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
-#     # convert to list, imap is evaluated on-demand
-#     list(multiprocessing.pool.ThreadPool(N).imap(_single_compile,objects))
-#     return objects
-# import distutils.ccompiler
-# distutils.ccompiler.CCompiler.compile=parallelCCompile
-
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
@@ -122,47 +104,26 @@ else:
     xtra_obj2d = []
     library_dirs = opencv_library_dirs
 
-extra_compile_args = [
-    "-D_USE_MATH_DEFINES",
-    "-std=c++11",
-    "-w",
-    "-O2",
-]
+extra_compile_args = ["-D_USE_MATH_DEFINES", "-std=c++11", "-w", "-O2"]
 if platform.system() == "Windows":
     # TODO: This is a quick and dirty fix for:
     # https://github.com/pupil-labs/pupil/issues/1331 We should investigate this more
     # and fix it correctly at some point.
-    extra_compile_args += [
-        "-D_ENABLE_EXTENDED_ALIGNED_STORAGE",
-    ]
+    extra_compile_args += ["-D_ENABLE_EXTENDED_ALIGNED_STORAGE"]
 
 extensions = [
     Extension(
-        name="pupil_detectors.detector_2d.detector_2d_core",
-        sources=[
-            "pupil_detectors/detector_2d/detector_2d_core.pyx",
-            "singleeyefitter/ImageProcessing/cvx.cpp",
-            "singleeyefitter/utils.cpp",
-            "singleeyefitter/detectorUtils.cpp",
-        ],
-        include_dirs=include_dirs,
-        libraries=libs,
-        library_dirs=library_dirs,
-        extra_link_args=[],  # '-WL,-R/usr/local/lib'
-        extra_compile_args=extra_compile_args,
-        extra_objects=xtra_obj2d,
-        depends=dependencies,
+        name="pupil_detectors.detector_base",
+        sources=["pupil_detectors/detector_base.pyx"],
         language="c++",
     ),
     Extension(
-        name="pupil_detectors.detector_3d.detector_3d_core",
+        name="pupil_detectors.detector_2d.detector_2d",
         sources=[
-            "pupil_detectors/detector_3d/detector_3d_core.pyx",
+            "pupil_detectors/detector_2d/detector_2d.pyx",
             "singleeyefitter/ImageProcessing/cvx.cpp",
             "singleeyefitter/utils.cpp",
             "singleeyefitter/detectorUtils.cpp",
-            "singleeyefitter/EyeModelFitter.cpp",
-            "singleeyefitter/EyeModel.cpp",
         ],
         include_dirs=include_dirs,
         libraries=libs,
@@ -173,6 +134,25 @@ extensions = [
         depends=dependencies,
         language="c++",
     ),
+    # Extension(
+    #     name="pupil_detectors.detector_3d.detector_3d",
+    #     sources=[
+    #         "pupil_detectors/detector_3d/detector_3d.pyx",
+    #         "singleeyefitter/ImageProcessing/cvx.cpp",
+    #         "singleeyefitter/utils.cpp",
+    #         "singleeyefitter/detectorUtils.cpp",
+    #         "singleeyefitter/EyeModelFitter.cpp",
+    #         "singleeyefitter/EyeModel.cpp",
+    #     ],
+    #     include_dirs=include_dirs,
+    #     libraries=libs,
+    #     library_dirs=library_dirs,
+    #     extra_link_args=[],  # '-WL,-R/usr/local/lib'
+    #     extra_compile_args=extra_compile_args,
+    #     extra_objects=xtra_obj2d,
+    #     depends=dependencies,
+    #     language="c++",
+    # ),
 ]
 
 if __name__ == "__main__":

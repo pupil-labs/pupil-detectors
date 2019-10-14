@@ -9,9 +9,9 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-from .detector_base import PupilDetector
 from .detector_2d import Detector2D
-from .detector_3d import Detector3D
+
+# from .detector_3d import Detector3D
 
 # TODO: Find out if this is still the case
 # # explicit import here for pyinstaller because it will not search .pyx source files.

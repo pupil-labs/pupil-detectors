@@ -1,5 +1,2 @@
-from .detector_2d import Detector2D
-from .detector_2d import detector_2d_default_properties
-from .detector_2d import DETECTOR_2D_PROPERTIES_NAMESPACE
-from .detector_2d import detector_2d_properties_to_namespaced_properties
-from .detector_2d import detector_2d_properties_from_namespaced_properties
+# rename from python side, since Detector2D is already defined in cython from c++
+from .detector_2d import Detector2DCore as Detector2D
