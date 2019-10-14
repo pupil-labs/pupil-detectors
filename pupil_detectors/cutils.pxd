@@ -11,7 +11,7 @@ See COPYING and COPYING.LESSER for license details.
 
 # cython: profile=False
 from .detector cimport *
-from methods import  normalize
+from .utils import normalize
 from numpy.math cimport PI
 
 cdef extern from 'singleeyefitter/mathHelper.h' namespace 'singleeyefitter::math':
@@ -19,11 +19,11 @@ cdef extern from 'singleeyefitter/mathHelper.h' namespace 'singleeyefitter::math
     Matrix21d cart2sph( Matrix31d& m )
 
 
-cdef inline convertTo2DPythonResult( Detector2DResult& result, object frame, object roi ):
+cdef inline convertTo2DPythonResult( Detector2DResult& result, int width, int height ):
 
 
     ellipse = {}
-    ellipse['center'] = (result.ellipse.center[0],result.ellipse.center[1])
+    ellipse['center'] = (result.ellipse.center[0], result.ellipse.center[1])
     ellipse['axes'] =  (result.ellipse.minor_radius * 2.0 ,result.ellipse.major_radius * 2.0)
     ellipse['angle'] = result.ellipse.angle * 180.0 / PI - 90.0
 
@@ -33,9 +33,8 @@ cdef inline convertTo2DPythonResult( Detector2DResult& result, object frame, obj
     py_result['ellipse'] = ellipse
     py_result['diameter'] = max(ellipse['axes'])
 
-    norm_center = normalize( ellipse['center'] , (frame.width, frame.height),flip_y=True)
+    norm_center = normalize(ellipse['center'], (width, height), flip_y=True)
     py_result['norm_pos'] = norm_center
-    py_result['timestamp'] = frame.timestamp
     py_result['method'] = '2d c++'
 
     return py_result

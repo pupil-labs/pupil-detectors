@@ -1,5 +1,3 @@
-import numpy as np
-
 cdef class DetectorBase:
     # pure python interface
     pass

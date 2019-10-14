@@ -48,3 +48,18 @@ class Roi(object):
 
     def get(self):
         return self.lX, self.lY, self.uX, self.uY, self.array_shape
+
+
+def normalize(pos, size, flip_y=False):
+    """
+    normalize return as float
+    """
+    width, height = size
+    x = pos[0]
+    y = pos[1]
+    x /= float(width)
+    y /= float(height)
+    if flip_y:
+        return x, 1 - y
+    return x, y
+
