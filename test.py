@@ -1,39 +1,33 @@
-# %%
-import pupil_detectors
-import numpy as np
-import imageio
+# %% imports
+from pprint import pprint
+
+import cv2
 import matplotlib.pyplot as plt
+import numpy as np
+
+import pupil_detectors
 from pupil_detectors.utils import Roi
 
-
-# %%
+# %% Create detector, print all properties
 a = pupil_detectors.Detector2D({})
-a.get_all_properties()
+pprint(a.get_all_properties())
 
-# %%
-img = imageio.imread("pupil.png").astype(np.uint8)
+# %% load and display input img
+img = cv2.imread("pupil.png")
 plt.imshow(img)
 
-#%%
-def rgb2gray(rgb):
-
-    r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
-    gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
-
-    return gray
-
-
-gray = rgb2gray(img).astype(np.uint8)
+# %% convert to gray image
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 plt.imshow(gray, cmap=plt.cm.gray)
 
 
-#%%
-
-roi = Roi(img.shape)
-roi.set((100, 100, 200, 200))
-results = a.detect(gray.astype(np.uint8), color_img=img, user_roi=roi)
+# %% detect pupil
+roi = Roi(gray.shape)
+roi.set((50, 50, 150, 150))
+results = a.detect(gray, color_img=img, user_roi=roi)
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 print(results)
-plt.imshow(img)
+plt.imshow(img_rgb)
 
 
 #%%
