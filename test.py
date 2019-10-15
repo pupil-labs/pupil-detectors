@@ -22,8 +22,6 @@ plt.imshow(gray, cmap=plt.cm.gray)
 
 
 # %% detect pupil
-roi = Roi.from_shape(gray.shape)
-# roi = Roi(50, 50, 150, 150)
 results = a.detect(gray)
 el = results["ellipse"]
 img_tmp = img.copy()

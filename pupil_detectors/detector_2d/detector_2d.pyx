@@ -13,16 +13,20 @@ import typing as T
 
 import cv2
 import numpy as np
+from numpy.math cimport PI
 from cython.operator cimport dereference as deref
 
-from pupil_detectors.detector cimport *
-from pupil_detectors.coarse_pupil cimport center_surround
-
-from .. cimport cutils
-from ..utils import (
-    Roi,
-    normalize,
+from ..detector cimport (
+    CV_8UC1,
+    CV_8UC3,
+    Mat,
+    Rect_,
+    Detector2DResult,
+    Detector2D,
 )
+from ..coarse_pupil cimport center_surround
+
+from ..utils import Roi
 from ..detector_base cimport DetectorBase
 
 
@@ -182,6 +186,18 @@ cdef class Detector2DCore(DetectorBase):
             False
         )
 
-        py_result = cutils.convertTo2DPythonResult(deref(cppResultPtr), image_width, image_height)
+        return self.convertTo2DPythonResult(deref(cppResultPtr))
+        
 
-        return py_result
+    cdef object convertTo2DPythonResult(self, Detector2DResult& result):
+        result_data = {
+            "ellipse": {
+                "center": (result.ellipse.center[0], result.ellipse.center[1]),
+                "axes": (result.ellipse.minor_radius * 2.0 ,result.ellipse.major_radius * 2.0),
+                "angle": result.ellipse.angle * 180.0 / PI - 90.0
+            },
+        }
+        result_data["diameter"] = max(result_data["ellipse"]["axes"])
+        result_data["location"] = result_data["ellipse"]["center"]
+        result_data["confidence"] = result.confidence
+        return result_data

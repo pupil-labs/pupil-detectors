@@ -41,17 +41,3 @@ class Roi:
     def from_shape(shape: T.Tuple[int, int]) -> "Roi":
         return Roi.from_rect(x=0, y=0, width=shape[1], height=shape[0])
 
-
-def normalize(pos, size, flip_y=False):
-    """
-    normalize return as float
-    """
-    width, height = size
-    x = pos[0]
-    y = pos[1]
-    x /= float(width)
-    y /= float(height)
-    if flip_y:
-        return x, 1 - y
-    return x, y
-
