@@ -13,22 +13,20 @@ import typing as T
 
 import cv2
 import numpy as np
-from numpy.math cimport PI
 from cython.operator cimport dereference as deref
+from numpy.math cimport PI
 
+from ..coarse_pupil cimport center_surround
 from ..detector cimport (
     CV_8UC1,
     CV_8UC3,
+    Detector2D,
+    Detector2DResult,
     Mat,
     Rect_,
-    Detector2DResult,
-    Detector2D,
 )
-from ..coarse_pupil cimport center_surround
-
-from ..utils import Roi
 from ..detector_base cimport DetectorBase
-
+from ..utils import Roi
 
 
 cdef class Detector2DCore(DetectorBase):
