@@ -134,25 +134,25 @@ extensions = [
         depends=dependencies,
         language="c++",
     ),
-    # Extension(
-    #     name="pupil_detectors.detector_3d.detector_3d",
-    #     sources=[
-    #         "pupil_detectors/detector_3d/detector_3d.pyx",
-    #         "singleeyefitter/ImageProcessing/cvx.cpp",
-    #         "singleeyefitter/utils.cpp",
-    #         "singleeyefitter/detectorUtils.cpp",
-    #         "singleeyefitter/EyeModelFitter.cpp",
-    #         "singleeyefitter/EyeModel.cpp",
-    #     ],
-    #     include_dirs=include_dirs,
-    #     libraries=libs,
-    #     library_dirs=library_dirs,
-    #     extra_link_args=[],  # '-WL,-R/usr/local/lib'
-    #     extra_compile_args=extra_compile_args,
-    #     extra_objects=xtra_obj2d,
-    #     depends=dependencies,
-    #     language="c++",
-    # ),
+    Extension(
+        name="pupil_detectors.detector_3d.detector_3d",
+        sources=[
+            "pupil_detectors/detector_3d/detector_3d.pyx",
+            "singleeyefitter/ImageProcessing/cvx.cpp",
+            "singleeyefitter/utils.cpp",
+            "singleeyefitter/detectorUtils.cpp",
+            "singleeyefitter/EyeModelFitter.cpp",
+            "singleeyefitter/EyeModel.cpp",
+        ],
+        include_dirs=include_dirs,
+        libraries=libs,
+        library_dirs=library_dirs,
+        extra_link_args=[],  # '-WL,-R/usr/local/lib'
+        extra_compile_args=extra_compile_args,
+        extra_objects=xtra_obj2d,
+        depends=dependencies,
+        language="c++",
+    ),
 ]
 
 if __name__ == "__main__":

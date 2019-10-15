@@ -32,14 +32,6 @@ from ..utils import Roi
 
 cdef class Detector2DCore(DetectorBase):
 
-    # Python-space properties
-    cdef readonly dict properties
-
-    # Cython-space properties
-    cdef Detector2D* thisptr
-    cdef int coarseDetectionPreviousWidth
-    cdef object coarseDetectionPreviousPosition
-
     def __cinit__(self, *args, **kwargs):
         self.thisptr = new Detector2D()
 
@@ -47,13 +39,10 @@ cdef class Detector2DCore(DetectorBase):
         del self.thisptr
 
     def __init__(self, properties = None):
-        self.coarseDetectionPreviousWidth = -1
-        self.coarseDetectionPreviousPosition = (0, 0)
-
         # initialize with defaults first and then set_properties to use type checking
         self.properties = self.get_default_properties()
         if properties is not None:
-            self.set_properties('2d', properties)
+            self.update_properties(properties)
 
     @staticmethod
     def get_default_properties():
@@ -86,24 +75,21 @@ cdef class Detector2DCore(DetectorBase):
     def get_property_namespaces(self) -> T.Iterable[str]:
         return ["2d"]
 
-    def get_properties(self, namespace: str) -> T.Dict[str, T.Any]:
-        if namespace != "2d":
-            raise ValueError(f"Unsupported property namespace: {namespace}")
-        return self.properties
+    def get_properties(self):
+        return {"2d": self.properties}
 
-    def set_properties(self, namespace: str, properties: T.Dict[str, T.Any]) -> None:
-        if namespace != "2d":
-            raise ValueError(f"Unsupported property namespace: {namespace}")
-        for key, value in properties:
+    def update_properties(self, properties):
+        relevant_properties = properties.get("2d", {})
+        for key, value in relevant_properties.items():
             if key not in self.properties:
-                raise KeyError(f"No property with name '{key}' found!")
+                continue
             expected_type = type(self.properties[key])
             if type(value) != expected_type:
                 raise ValueError(
                     f"Property value {repr(value)} "
                     f"does not match expected type: {expected_type}"
                 )
-        self.properties.update(properties)
+            self.properties[key] = value
 
     def detect(
         self,

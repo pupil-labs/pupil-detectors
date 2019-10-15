@@ -2,11 +2,20 @@ import typing as T
 
 import numpy as np
 
+NamespacedProperties = T.Dict[str, T.Dict[str, T.Any]]
 
 cdef class DetectorBase:
     """Base interface for pupil detectors."""
 
     # abstract interface
+
+    def __init__(self, properties:T.Optional[NamespacedProperties]=None):
+        """Construct a new detector.
+        
+        Parameters:
+            properties (optional): dicts of properties, grouped by namespaces
+        """
+        raise NotImplementedError()
 
     def detect(self, gray_img: np.nparray, **kwargs) -> T.Dict[str, T.Any]:
         """Detect pupil location in input image.
@@ -27,22 +36,13 @@ cdef class DetectorBase:
         """Returns a list of property namespaces that the detector supports."""
         raise NotImplementedError()
 
-    def get_properties(self, namespace: str) -> T.Dict[str, T.Any]:
-        """Returns current properties for a given namespace."""
+    def get_properties(self) -> NamespacedProperties:
+        """Returns properties and values of the detector."""
         raise NotImplementedError()
 
-    def set_properties(self, namespace: str, properties: T.Dict[str, T.Any]) -> None:
-        """Sets all properties for a given namespace."""
+    def update_properties(self, properties: NamespacedProperties) -> None:
+        """Update existing properties of the detector."""
         raise NotImplementedError()
-
-    # convenience functions
-
-    def get_all_properties(self) -> T.Dict[str, T.Dict[str, T.Any]]:
-        """Returns all current properties for all namespaces."""
-        return {
-            namespace: self.get_properties(namespace)
-            for namespace in self.get_property_namespaces()
-        }
 
 
 cdef class TemporalDetectorBase(DetectorBase):

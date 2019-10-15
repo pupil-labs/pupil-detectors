@@ -1,3 +1,4 @@
+# cython: profile=False, language_level=3
 """
 (*)~---------------------------------------------------------------------------
 Pupil - eye tracking platform
@@ -8,11 +9,17 @@ Lesser General Public License (LGPL v3.0).
 See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
+from libcpp.memory cimport shared_ptr
 
-from .utils import Roi
-from .detector_2d import Detector2D
-from .detector_3d import Detector3D
+from ..detector cimport (
+    Detector2D,
+    Detector2DResult,
+)
+from ..detector_base cimport DetectorBase
 
-# TODO: Find out if this is still the case
-# # explicit import here for pyinstaller because it will not search .pyx source files.
-# from .detector_3d import Eye_Visualizer
+
+cdef class Detector2DCore(DetectorBase):
+    cdef dict properties
+    cdef Detector2D* thisptr
+
+    cdef shared_ptr[Detector2DResult] c_detect(self, gray_img, color_img=*, roi=*)

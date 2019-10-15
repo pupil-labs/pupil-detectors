@@ -9,62 +9,70 @@ Lesser General Public License (LGPL v3.0).
 See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
+import typing as T
 import cv2
+import numpy as np
 from cython.operator cimport dereference as deref
 
-from pupil_detectors.coarse_pupil cimport center_surround
-from pupil_detectors.detector cimport *
-from pupil_detectors.detector_utils cimport *
+from ..coarse_pupil cimport center_surround
+from ..detector cimport *
+from ..cutils cimport *
 
-from methods import Roi, normalize
+from ..detector_base cimport TemporalDetectorBase
+from ..detector_2d.detector_2d cimport Detector2DCore
+from ..utils import Roi
 
 
-cdef class Detector3DCore:
+cdef class Detector3DCore(TemporalDetectorBase):
 
     # Python-space properties
-    cdef readonly dict detector_properties_2d
-    cdef readonly dict detector_properties_3d
     cdef readonly object debug_result
 
     # Cython-space properties
-    cdef Detector2D* detector2DPtr
+    cdef dict properties
+    cdef Detector2DCore detector2D
     cdef EyeModelFitter *detector3DPtr
 
     def __cinit__(self, *args, **kwargs):
-        self.detector2DPtr = new Detector2D()
         focal_length = 620.
-        '''
-        K for 30hz eye cam:
-        [ 634.16873016    0.          343.40537637]
-        [   0.          605.57862234  252.3924477 ]
-        [   0.            0.            1.        ]
-        '''
-        #region_band_width = 5
-        #region_step_epsilon = 0.5
         self.detector3DPtr = new EyeModelFitter(focal_length)
-
-    def __init__(self, detector_properties_2d, detector_properties_3d):
-
-        # Overwrite default 2D detector properties
-        self.detector_properties_2d = {}
-        self.detector_properties_2d["strong_perimeter_ratio_range_min"] = 0.8
-        self.detector_properties_2d["strong_area_ratio_range_min"] = 0.6
-        self.detector_properties_2d["ellipse_roundness_ratio"] = 0.1
-        self.detector_properties_2d["initial_ellipse_fit_treshhold"] = 1.8
-        self.detector_properties_2d["final_perimeter_ratio_range_min"] = 0.6
-        self.detector_properties_2d["final_perimeter_ratio_range_max"] = 1.2
-        self.detector_properties_2d["ellipse_true_support_min_dist"] = 2.5
-        self.detector_properties_2d.update(detector_properties_2d)
-
-        # Overwrite default 3D detector properties
-        self.detector_properties_3d = {}
-        # Never freeze model in the beginning to allow initial model fitting.
-        self.detector_properties_3d["model_is_frozen"] = False
-        self.detector_properties_3d.update(detector_properties_3d)
-
+        
     def __dealloc__(self):
-      del self.detector2DPtr
-      del self.detector3DPtr
+        del self.detector3DPtr
+
+    def __init__(self, properties=None):
+        self.detector2D = Detector2DCore(properties)
+        if properties is None:
+            # Overwrite default 2D detector properties
+            overwrite_2d = {
+                "2d": {
+                    "strong_perimeter_ratio_range_min": 0.8,
+                    "strong_area_ratio_range_min": 0.6,
+                    "ellipse_roundness_ratio": 0.1,
+                    "initial_ellipse_fit_treshhold": 1.8,
+                    "final_perimeter_ratio_range_min": 0.6,
+                    "final_perimeter_ratio_range_max": 1.2,
+                    "ellipse_true_support_min_dist": 2.5,
+                }
+            }
+            self.detector2D.update_properties(overwrite_2d)
+
+        # initialize with defaults first and then set_properties to use type checking
+        self.properties = self.get_default_properties()
+        if properties is not None:
+            self.update_properties(properties)
+        
+        # Never freeze model in the beginning to allow initial model fitting.
+        self.update_properties({"3d": {"model_is_frozen": False}})
+
+    @staticmethod
+    def get_default_properties():
+        return {
+            "model_is_frozen": False,
+            "model_sensitivity": 0.997
+        }
+
+    
 
     ##### Public API
 
@@ -74,91 +82,138 @@ cdef class Detector3DCore:
     def reset_model(self):
         self.detector3DPtr.reset()
 
-    ##### Legacy API
+    # Base interface
 
-    def set_2d_detector_property(self, name, value):
-        set_detector_property(self.detector_properties_2d, name, value)
+    def get_property_namespaces(self):
+        return ["2d", "3d"]
 
-    def set_3d_detector_property(self, name, value):
-        set_detector_property(self.detector_properties_3d, name, value)
+    def get_properties(self):
+        all_properties = self.detector2D.get_properties()
+        all_properties["3d"] = self.properties
+        return all_properties
+
+    def update_properties(self, properties):
+        self.detector2D.update_properties(properties)
+        relevant_properties = properties.get("3d", {})
+        for key, value in relevant_properties.items():
+            if key not in self.properties:
+                continue
+            expected_type = type(self.properties[key])
+            if type(value) != expected_type:
+                raise ValueError(
+                    f"Property value {repr(value)} "
+                    f"does not match expected type: {expected_type}"
+                )
+            self.properties[key] = value
+
 
     ##### Core API
+    def detect(
+        self,
+        gray_img: np.ndarray,
+        timestamp: float,
+        color_img: T.Optional[np.ndarray]=None,
+        roi: T.Optional[Roi]=None,
+        debug=False,
+        **kwargs
+    ) -> T.Dict[str, T.Any]:
+        
+        cpp2DResultPtr = self.detector2D.c_detect(gray_img, color_img, roi)
 
-    def detect(self, frame, user_roi, visualize, pause_video = False, is_debugging_enabled = False, **kwargs):
-        image_width = frame.width
-        image_height = frame.height
+        # timestamp doesn't get set elsewhere and it is needed in detector3D
+        deref(cpp2DResultPtr).timestamp = timestamp
 
-        cdef unsigned char[:,::1] img = frame.gray
-        cdef Mat cv_image = Mat(image_height, image_width, CV_8UC1, <void *> &img[0,0] )
+        cpp3DResult  = self.detector3DPtr.updateAndDetect(cpp2DResultPtr, self.properties, debug)
 
-        cdef unsigned char[:,:,:] img_color
-        cdef Mat cv_image_color
-        cdef Mat debug_image
+        height, width = gray_img.shape
+        pyResult = self.convertTo3DPythonResult(cpp3DResult, timestamp, width, height)
 
-        if visualize:
-            img_color = frame.img
-            cv_image_color = Mat(image_height, image_width, CV_8UC3, <void *> &img_color[0,0,0] )
-
-        roi = Roi((0,0))
-        roi.set( user_roi.get() )
-        roi_x = roi.get()[0]
-        roi_y = roi.get()[1]
-        roi_width  = roi.get()[2] - roi.get()[0]
-        roi_height  = roi.get()[3] - roi.get()[1]
-        cdef int[:,::1] integral
-
-        if self.detector_properties_2d['coarse_detection'] and roi_width*roi_height > 320*240:
-            scale = 2 # half the integral image. boost up integral
-            # TODO maybe implement our own Integral so we don't have to half the image
-            user_roi_image = frame.gray[user_roi.view]
-            integral = cv2.integral(user_roi_image[::scale,::scale])
-            coarse_filter_max = self.detector_properties_2d['coarse_filter_max']
-            coarse_filter_min = self.detector_properties_2d['coarse_filter_min']
-            bounding_box , good_ones , bad_ones = center_surround( integral, coarse_filter_min/scale , coarse_filter_max/scale )
-
-            if visualize:
-                # !! uncomment this to visualize coarse detection
-                #  # draw the candidates
-                # for v  in bad_ones:
-                #     p_x,p_y,w,response = v
-                #     x = p_x * scale + roi_x
-                #     y = p_y * scale + roi_y
-                #     width = w*scale
-                #     cv2.rectangle( frame.img , (x,y) , (x+width , y+width) , (0,0,255)  )
-
-                # # draw the candidates
-                for v  in good_ones:
-                    p_x,p_y,w,response = v
-                    x = p_x * scale + roi_x
-                    y = p_y * scale + roi_y
-                    width = w*scale
-                    cv2.rectangle( frame.img , (x,y) , (x+width , y+width) , (255,255,0)  )
-                    #responseText = '{:2f}'.format(response)
-                    #cv2.putText(frame.img, responseText,(int(x+width*0.5) , int(y+width*0.5)), cv2.FONT_HERSHEY_PLAIN,0.7,(0,0,255) , 1 )
-
-                    #center = (int(x+width*0.5) , int(y+width*0.5))
-                    #cv2.circle( frame.img , center , 5 , (255,0,255) , -1  )
-
-            x1 , y1 , x2, y2 = bounding_box
-            width = x2 - x1
-            height = y2 - y1
-            roi_x = x1 * scale + roi_x
-            roi_y = y1 * scale + roi_y
-            roi_width = width*scale
-            roi_height = height*scale
-            roi.set((roi_x, roi_y, roi_x+roi_width, roi_y+roi_height))
-
-        # every coordinates in the result are relative to the current ROI
-        cpp2DResultPtr =  self.detector2DPtr.detect(self.detector_properties_2d, cv_image, cv_image_color, debug_image, Rect_[int](roi_x,roi_y,roi_width,roi_height), visualize , False ) #we don't use debug image in 3d model
-
-        deref(cpp2DResultPtr).timestamp = frame.timestamp #timestamp doesn't get set elsewhere and it is needt in detector3D
-
-        ######### 3D Model Part ############
-        cdef Detector3DResult cpp3DResult  = self.detector3DPtr.updateAndDetect( cpp2DResultPtr , self.detector_properties_3d, is_debugging_enabled)
-
-        pyResult = convertTo3DPythonResult(cpp3DResult , frame )
-
-        if is_debugging_enabled:
-            self.debug_result = prepareForVisualization3D(cpp3DResult)
+        if debug:
+            self.debug_result = self.prepareForVisualization3D(cpp3DResult)
 
         return pyResult
+
+
+    cdef convertTo3DPythonResult(self, Detector3DResult& result, timestamp, width, height):
+        #use negative z-coordinates to get from left-handed to right-handed coordinate system
+        py_result = {}
+        py_result['topic'] = 'pupil'
+
+        circle = {}
+        circle['center'] =  (result.circle.center[0],-result.circle.center[1], result.circle.center[2])
+        circle['normal'] =  (result.circle.normal[0],-result.circle.normal[1], result.circle.normal[2])
+        circle['radius'] =  result.circle.radius
+        py_result['circle_3d'] = circle
+
+
+        py_result['confidence'] = result.confidence
+        py_result['timestamp'] = timestamp
+        py_result['diameter_3d'] = result.circle.radius * 2.0
+
+        ellipse = {}
+        ellipse['center'] = (result.ellipse.center[0] + width / 2.0 ,height / 2.0  -  result.ellipse.center[1])
+        ellipse['axes'] =  (result.ellipse.minor_radius * 2.0 ,result.ellipse.major_radius * 2.0)
+        ellipse['angle'] = - (result.ellipse.angle * 180.0 / PI - 90.0)
+        py_result['ellipse'] = ellipse
+        # norm_center = normalize( ellipse['center'] , (width, height),flip_y=True)
+        # py_result['norm_pos'] = norm_center
+        py_result['diameter'] = max(ellipse['axes'])
+
+        sphere = {}
+        sphere['center'] =  (result.sphere.center[0],-result.sphere.center[1], result.sphere.center[2])
+        sphere['radius'] =  result.sphere.radius
+        py_result['sphere'] = sphere
+
+        if str(result.projectedSphere.center[0]) == 'nan':
+            projectedSphere = {'axes': (0.,0.), 'angle': 90.0, 'center': (0.,0.)}
+        else:
+            projectedSphere = {}
+            projectedSphere['center'] = (result.projectedSphere.center[0] + width / 2.0 ,height / 2.0  -  result.projectedSphere.center[1])
+            projectedSphere['axes'] =  (result.projectedSphere.minor_radius * 2.0 ,result.projectedSphere.major_radius * 2.0)
+            #TODO result.projectedSphere.angle is always 0
+            projectedSphere['angle'] = - (result.projectedSphere.angle * 180.0 / PI - 90.0)
+        py_result['projected_sphere'] = projectedSphere
+
+        py_result['model_confidence'] = result.modelConfidence
+        py_result['model_id'] = result.modelID
+        py_result['model_birth_timestamp'] = result.modelBirthTimestamp
+
+
+        coords = cart2sph(result.circle.normal)
+        if str(coords[0]) == 'nan':
+            py_result['theta'] = 0.0
+            py_result['phi'] = 0.0
+        else:
+            py_result['theta'] = coords[0]
+            py_result['phi'] = coords[1]
+        py_result['method'] = '3d c++'
+
+        return py_result
+
+
+    cdef prepareForVisualization3D(self, Detector3DResult& result):
+
+        py_visualizationResult = {}
+
+        py_visualizationResult['edges'] = getEdges(result)
+        py_visualizationResult['circle'] = getCircle(result)
+        py_visualizationResult['predicted_circle'] = getPredictedCircle(result)
+
+        models = []
+        for model in result.models:
+            props = {}
+            props['bin_positions'] = getBinPositions(model)
+            props['sphere'] = getSphere(model)
+            props['initial_sphere'] = getInitialSphere(model)
+            props['maturity'] = model.maturity
+            props['solver_fit'] = model.solverFit
+            props['confidence'] = model.confidence
+            props['performance'] = model.performance
+            props['performance_gradient'] = model.performanceGradient
+            props['model_id'] = model.modelID
+            props['birth_timestamp'] = model.birthTimestamp
+            models.append(props)
+
+        py_visualizationResult['models'] = models
+
+        return py_visualizationResult
