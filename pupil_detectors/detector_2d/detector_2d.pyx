@@ -14,6 +14,7 @@ import typing as T
 import cv2
 import numpy as np
 from cython.operator cimport dereference as deref
+from libcpp.memory cimport shared_ptr
 from numpy.math cimport PI
 
 from ..coarse_pupil cimport center_surround
@@ -111,6 +112,16 @@ cdef class Detector2DCore(DetectorBase):
         roi: T.Optional[Roi]=None,
         **kwargs
     ) -> T.Dict[str, T.Any]:
+        cppResultPtr = self.c_detect(gray_img, color_img, roi)
+        return self.convertTo2DPythonResult(deref(cppResultPtr))
+
+
+    cdef shared_ptr[Detector2DResult] c_detect(
+        self,
+        gray_img: np.ndarray,
+        color_img: T.Optional[np.ndarray]=None,
+        roi: T.Optional[Roi]=None,
+    ):
 
         image_height, image_width = gray_img.shape
 
@@ -122,7 +133,7 @@ cdef class Detector2DCore(DetectorBase):
         cdef Mat frame_image = Mat(image_height, image_width, CV_8UC1, <void *> &gray_img_data[0, 0])
         cdef Mat frameColor
 
-        # not used, but needed for legacy API
+        # not used, but needed for c++ API
         cdef Mat debug_image
 
         should_visualize = False if color_img is None else True
@@ -174,7 +185,7 @@ cdef class Detector2DCore(DetectorBase):
             )
 
         # every coordinates in the result are relative to the current ROI
-        cppResultPtr =  self.thisptr.detect(
+        cppResultPtr = self.thisptr.detect(
             self.properties,
             frame_image,
             frameColor,
@@ -184,7 +195,7 @@ cdef class Detector2DCore(DetectorBase):
             False
         )
 
-        return self.convertTo2DPythonResult(deref(cppResultPtr))
+        return cppResultPtr
         
 
     cdef object convertTo2DPythonResult(self, Detector2DResult& result):
