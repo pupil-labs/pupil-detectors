@@ -19,14 +19,18 @@ from pupil_detectors.detector cimport *
 from pupil_detectors.coarse_pupil cimport center_surround
 
 from .. cimport cutils
-from ..utils import Roi, normalize
+from ..utils import (
+    Roi,
+    normalize,
+)
 from ..detector_base cimport DetectorBase
+
+
 
 cdef class Detector2DCore(DetectorBase):
 
     # Python-space properties
     cdef readonly dict properties
-    cdef unsigned char[:,:,:] debug_image
 
     # Cython-space properties
     cdef Detector2D* thisptr
@@ -41,7 +45,7 @@ cdef class Detector2DCore(DetectorBase):
 
     def __init__(self, properties = None):
         self.coarseDetectionPreviousWidth = -1
-        self.coarseDetectionPreviousPosition =  (0,0)
+        self.coarseDetectionPreviousPosition = (0, 0)
 
         # initialize with defaults first and then set_properties to use type checking
         self.properties = self.get_default_properties()
@@ -102,66 +106,70 @@ cdef class Detector2DCore(DetectorBase):
         self,
         gray_img: np.ndarray,
         color_img: T.Optional[np.ndarray]=None,
-        user_roi: T.Optional[Roi]=None,
+        roi: T.Optional[Roi]=None,
         **kwargs
     ) -> T.Dict[str, T.Any]:
 
-        image_width = gray_img.shape[1]
-        image_height = gray_img.shape[0]
+        image_height, image_width = gray_img.shape
 
-        # TODO: remove img_color and img
-        cdef unsigned char[:,::1] img = gray_img
-        cdef Mat frame_image = Mat(image_height, image_width, CV_8UC1, <void *> &img[0,0])
+        # cython memory views for accessing the raw data (does not copy)
+        # NOTE: [:, ::1] marks the view as c-contiguous
+        cdef unsigned char[:, ::1] gray_img_data = gray_img
+        cdef unsigned char[:, :, ::1] color_img_data
 
-        cdef unsigned char[:,:,:] img_color
+        cdef Mat frame_image = Mat(image_height, image_width, CV_8UC1, <void *> &gray_img_data[0, 0])
         cdef Mat frameColor
+
+        # not used, but needed for legacy API
         cdef Mat debug_image
 
         should_visualize = False if color_img is None else True
 
         if should_visualize:
-            img_color = color_img
-            frameColor = Mat(image_height, image_width, CV_8UC3, <void *> &img_color[0,0,0])
+            color_img_data = color_img
+            frameColor = Mat(image_height, image_width, CV_8UC3, <void *> &color_img_data[0, 0, 0])
         
-        if user_roi is None:
-            user_roi = Roi(gray_img.shape)
+        if roi is None:
+            roi = Roi.from_rect(0, 0, image_width, image_height)
 
-        roi = Roi((0,0))
-        roi.set( user_roi.get() )
-        roi_x = roi.get()[0]
-        roi_y = roi.get()[1]
-        roi_width  = roi.get()[2] - roi.get()[0]
-        roi_height  = roi.get()[3] - roi.get()[1]
-        cdef int[:,::1] integral
+        cdef int[:, ::1] integral
 
-        if self.properties['coarse_detection'] and roi_width*roi_height > 320*240:
-            print("Using coarse detection!")
+        if self.properties['coarse_detection'] and roi.width * roi.height > 320 * 240:
             scale = 2 # half the integral image. boost up integral
             # TODO maybe implement our own Integral so we don't have to half the image
-            user_roi_image = gray_img[user_roi.view]
+            user_roi_image = gray_img[roi.slices]
             integral = cv2.integral(user_roi_image[::scale,::scale])
             coarse_filter_max = self.properties['coarse_filter_max']
             coarse_filter_min = self.properties['coarse_filter_min']
-            bounding_box , good_ones , bad_ones = center_surround( integral, coarse_filter_min/scale , coarse_filter_max/scale )
+            bounding_box, good_ones, bad_ones = center_surround(
+                integral,
+                coarse_filter_min / scale,
+                coarse_filter_max / scale
+            )
 
             if should_visualize:
                 # # draw the candidates
-                for v  in good_ones:
-                    p_x,p_y,w,response = v
-                    x = p_x * scale + roi_x
-                    y = p_y * scale + roi_y
+                for v in good_ones:
+                    p_x, p_y, w, response = v
+                    x = p_x * scale + roi.x_min
+                    y = p_y * scale + roi.y_min
                     width = w*scale
-                    cv2.rectangle( color_img , (x,y) , (x+width , y+width) , (255,255,0)  )
+                    cv2.rectangle(
+                        color_img,
+                        (x, y),
+                        (x + width, y + width),
+                        (255, 255, 0)
+                    )
 
-            x1 , y1 , x2, y2 = bounding_box
+            x1, y1, x2, y2 = bounding_box
             width = x2 - x1
             height = y2 - y1
-            roi_x = x1 * scale + roi_x
-            roi_y = y1 * scale + roi_y
-            roi_width = width*scale
-            roi_height = height*scale
-            roi.set((roi_x, roi_y, roi_x+roi_width, roi_y+roi_height))
-
+            roi = Roi.from_rect(
+                x=x1 * scale + roi.x_min,
+                y=y1 * scale + roi.y_min,
+                width=width * scale,
+                height=height * scale
+            )
 
         # every coordinates in the result are relative to the current ROI
         cppResultPtr =  self.thisptr.detect(
@@ -169,7 +177,7 @@ cdef class Detector2DCore(DetectorBase):
             frame_image,
             frameColor,
             debug_image,
-            Rect_[int](roi_x,roi_y,roi_width,roi_height),
+            Rect_[int](roi.x_min, roi.y_min, roi.width, roi.height),
             should_visualize,
             False
         )

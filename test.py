@@ -22,12 +22,28 @@ plt.imshow(gray, cmap=plt.cm.gray)
 
 
 # %% detect pupil
-roi = Roi(gray.shape)
-roi.set((50, 50, 150, 150))
-results = a.detect(gray, color_img=img, user_roi=roi)
-img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-print(results)
+roi = Roi.from_shape(gray.shape)
+# roi = Roi(50, 50, 150, 150)
+results = a.detect(gray)
+el = results["ellipse"]
+img_tmp = img.copy()
+cv2.ellipse(
+    img_tmp,
+    center=tuple(int(v) for v in el["center"]),
+    axes=tuple(int(v / 2) for v in el["axes"]),
+    angle=int(el["angle"]),
+    startAngle=0,
+    endAngle=360,
+    color=[0, 0, 255],
+)
+img_rgb = cv2.cvtColor(img_tmp, cv2.COLOR_BGR2RGB)
+pprint(results)
 plt.imshow(img_rgb)
 
 
-#%%
+# %% algorithm view and roi
+roi = Roi(50, 50, 150, 150)
+img_tmp = img.copy()
+a.detect(gray, color_img=img_tmp, roi=roi)
+img_rgb = cv2.cvtColor(img_tmp, cv2.COLOR_BGR2RGB)
+plt.imshow(img_rgb)

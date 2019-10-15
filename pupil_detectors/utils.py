@@ -1,53 +1,45 @@
-class Roi(object):
-    """this is a simple 2D Region of Interest class
-    it is applied on numpy arrays for convenient slicing
-    like this:
+import typing as T
 
-    roi_array_slice = full_array[r.view]
-    # do something with roi_array_slice
 
-    this creates a view, no data copying done
-    """
-
-    def __init__(self, array_shape):
-        self.array_shape = array_shape
-        self.lX = 0
-        self.lY = 0
-        self.uX = array_shape[1]
-        self.uY = array_shape[0]
-        self.nX = 0
-        self.nY = 0
+class Roi:
+    def __init__(self, x_min: int, y_min: int, x_max: int, y_max: int):
+        self.x_min = x_min
+        self.y_min = y_min
+        self.x_max = x_max
+        self.y_max = y_max
 
     @property
-    def view(self):
-        return slice(self.lY, self.uY), slice(self.lX, self.uX)
+    def width(self) -> int:
+        return self.x_max - self.x_min
 
-    @view.setter
-    def view(self, value):
-        raise Exception("The view field is read-only. Use the set methods instead")
+    @property
+    def height(self) -> int:
+        return self.y_max - self.y_min
 
-    def add_vector(self, vector):
-        """
-        adds the roi offset to a len2 vector
-        """
-        x, y = vector
-        return (self.lX + x, self.lY + y)
+    @property
+    def slices(self) -> T.Tuple[slice, slice]:
+        return slice(self.y_min, self.y_max + 1), slice(self.x_min, self.x_max + 1)
 
-    def sub_vector(self, vector):
-        """
-        subs the roi offset to a len2 vector
-        """
-        x, y = vector
-        return (x - self.lX, y - self.lY)
+    @property
+    def rect(self) -> T.Tuple[int, int, int, int]:
+        return self.x_min, self.x_max, self.width, self.height
 
-    def set(self, vals):
-        if vals is not None and len(vals) is 5:
-            self.lX, self.lY, self.uX, self.uY, self.array_shape = vals
-        elif vals is not None and len(vals) is 4:
-            self.lX, self.lY, self.uX, self.uY = vals
+    @staticmethod
+    def from_slices(x_slice: slice, y_slice: slice) -> "Roi":
+        return Roi(
+            x_min=x_slice.start,
+            y_min=y_slice.start,
+            x_max=x_slice.stop - 1,
+            y_max=y_slice.stop - 1,
+        )
 
-    def get(self):
-        return self.lX, self.lY, self.uX, self.uY, self.array_shape
+    @staticmethod
+    def from_rect(x: int, y: int, width: int, height: int) -> "Roi":
+        return Roi(x_min=x, y_min=y, x_max=x + width - 1, y_max=y + height - 1)
+
+    @staticmethod
+    def from_shape(shape: T.Tuple[int, int]) -> "Roi":
+        return Roi.from_rect(x=0, y=0, width=shape[1], height=shape[0])
 
 
 def normalize(pos, size, flip_y=False):
