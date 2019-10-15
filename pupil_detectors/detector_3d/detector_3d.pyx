@@ -137,7 +137,6 @@ cdef class Detector3DCore(TemporalDetectorBase):
     cdef convertTo3DPythonResult(self, Detector3DResult& result, timestamp, width, height):
         #use negative z-coordinates to get from left-handed to right-handed coordinate system
         py_result = {}
-        py_result['topic'] = 'pupil'
 
         circle = {}
         circle['center'] =  (result.circle.center[0],-result.circle.center[1], result.circle.center[2])
@@ -157,6 +156,8 @@ cdef class Detector3DCore(TemporalDetectorBase):
         py_result['ellipse'] = ellipse
         # norm_center = normalize( ellipse['center'] , (width, height),flip_y=True)
         # py_result['norm_pos'] = norm_center
+        py_result["location"] = ellipse['center']
+
         py_result['diameter'] = max(ellipse['axes'])
 
         sphere = {}
