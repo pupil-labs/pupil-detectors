@@ -112,8 +112,35 @@ cdef class Detector2DCore(DetectorBase):
         roi: T.Optional[Roi]=None,
         **kwargs
     ) -> T.Dict[str, T.Any]:
+        """Detect pupil location in input image.
+        
+        Parameters:
+            gray_img: input image as 2D numpy array (grayscale)
+            color_img (optional): 3D numpy array (BGR)
+                will be used to display debug visualizations
+            roi (optional): Roi mask for gray_img to speed up detection
+
+        Returns:
+            Dictionary with information about the pupil. Keys:
+                location (float, float): location of the pupil in image space
+                confidence (float): confidence of the algorithm in [0, 1]
+                diameter (float): max diameter of the pupil
+                ellipse (dict): exact ellipse parameters of the pupil
+        """
         cppResultPtr = self.c_detect(gray_img, color_img, roi)
-        return self.convertTo2DPythonResult(deref(cppResultPtr))
+        result = deref(cppResultPtr)
+
+        result_data = {
+            "ellipse": {
+                "center": (result.ellipse.center[0], result.ellipse.center[1]),
+                "axes": (result.ellipse.minor_radius * 2.0 ,result.ellipse.major_radius * 2.0),
+                "angle": result.ellipse.angle * 180.0 / PI - 90.0
+            },
+        }
+        result_data["diameter"] = max(result_data["ellipse"]["axes"])
+        result_data["location"] = tuple(int(v) for v in result_data["ellipse"]["center"])
+        result_data["confidence"] = result.confidence
+        return result_data
 
 
     cdef shared_ptr[Detector2DResult] c_detect(
@@ -122,7 +149,6 @@ cdef class Detector2DCore(DetectorBase):
         color_img: T.Optional[np.ndarray]=None,
         roi: T.Optional[Roi]=None,
     ):
-
         image_height, image_width = gray_img.shape
 
         # cython memory views for accessing the raw data (does not copy)
@@ -196,17 +222,3 @@ cdef class Detector2DCore(DetectorBase):
         )
 
         return cppResultPtr
-        
-
-    cdef object convertTo2DPythonResult(self, Detector2DResult& result):
-        result_data = {
-            "ellipse": {
-                "center": (result.ellipse.center[0], result.ellipse.center[1]),
-                "axes": (result.ellipse.minor_radius * 2.0 ,result.ellipse.major_radius * 2.0),
-                "angle": result.ellipse.angle * 180.0 / PI - 90.0
-            },
-        }
-        result_data["diameter"] = max(result_data["ellipse"]["axes"])
-        result_data["location"] = result_data["ellipse"]["center"]
-        result_data["confidence"] = result.confidence
-        return result_data

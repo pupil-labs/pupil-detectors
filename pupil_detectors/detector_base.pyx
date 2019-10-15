@@ -17,8 +17,8 @@ cdef class DetectorBase:
         Returns:
             Dictionary with information about the pupil.
             Minimum required keys are:
-                location (int, int): location of the pupil in image space
-                confidence (int): confidence of the algorithm in [0, 1]
+                location (float, float): location of the pupil in image space
+                confidence (float): confidence of the algorithm in [0, 1]
             More keys can be added for custom functionality when subclassing.
         """
         raise NotImplementedError()
@@ -63,8 +63,8 @@ cdef class TemporalDetectorBase(DetectorBase):
         Returns:
             Dictionary with information about the pupil.
             Minimum required keys are:
-                location (int, int): location of the pupil in image space
-                confidence (int): confidence of the algorithm in [0, 1]
+                location (float, float): location of the pupil in image space
+                confidence (float): confidence of the algorithm in [0, 1]
                 timestamp (float): the timestamp of the input
             More keys can be added for custom functionality when subclassing.
         """
