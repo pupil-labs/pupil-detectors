@@ -13,10 +13,22 @@ import typing as T
 import cv2
 import numpy as np
 from cython.operator cimport dereference as deref
+from numpy.math cimport PI
 
 from ..coarse_pupil cimport center_surround
-from ..detector cimport *
-from ..cutils cimport *
+from ..detector cimport (
+    Detector3DResult,
+    EyeModelFitter,
+)
+from ..cutils cimport (
+    cart2sph,
+    getBinPositions,
+    getEdges,
+    getCircle,
+    getPredictedCircle,
+    getSphere,
+    getInitialSphere,
+)
 
 from ..detector_base cimport TemporalDetectorBase
 from ..detector_2d.detector_2d cimport Detector2DCore

@@ -10,12 +10,15 @@ See COPYING and COPYING.LESSER for license details.
 """
 
 # cython: profile=False
-from .detector cimport *
-from .utils import normalize
-from numpy.math cimport PI
+from .detector cimport (
+    Matrix21d,
+    Matrix31d,
+    ModelDebugProperties,
+    Detector3DResult,
+)
+
 
 cdef extern from 'singleeyefitter/mathHelper.h' namespace 'singleeyefitter::math':
-
     Matrix21d cart2sph( Matrix31d& m )
 
 
@@ -29,6 +32,7 @@ cdef inline getBinPositions( ModelDebugProperties& result ):
     for point in result.binPositions:
         positions.append([point[0]*eyeRadius+eyePosition[0],point[1]*eyeRadius+eyePosition[1],point[2]*eyeRadius+eyePosition[2]])
     return positions
+
 
 cdef inline getEdges( Detector3DResult& result ):
     if result.edges.size() == 0:
@@ -45,6 +49,7 @@ cdef inline getCircle(const Detector3DResult& result):
     normal = result.circle.normal
     return [ [center[0],center[1],center[2]], [normal[0],normal[1],normal[2]], radius ]
 
+
 cdef inline getPredictedCircle(const Detector3DResult& result):
     center = result.predictedCircle.center
     radius = result.predictedCircle.radius
@@ -56,9 +61,11 @@ cdef inline getSphere(const ModelDebugProperties& result ):
     sphere = result.sphere
     return [ [sphere.center[0],sphere.center[1],sphere.center[2]],sphere.radius]
 
+
 cdef inline getInitialSphere(const ModelDebugProperties& result ):
     sphere = result.initialSphere
     return [ [sphere.center[0],sphere.center[1],sphere.center[2]],sphere.radius]
+
 
 cdef inline set_detector_property(properties, name, value):
     if name not in properties:
@@ -66,5 +73,4 @@ cdef inline set_detector_property(properties, name, value):
     if not isinstance(value, type(properties[name])):
         raise TypeError("Value {} was not of expected type `{}` found."
                         .format(value, type(properties[name]).__name__))
-
     properties[name] = value
