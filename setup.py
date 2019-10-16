@@ -9,24 +9,6 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-# # monkey-patch for parallel compilation
-# def parallelCCompile(self, sources, output_dir=None, macros=None, include_dirs=None, debug=0, extra_preargs=None, extra_postargs=None, depends=None):
-#     # those lines are copied from distutils.ccompiler.CCompiler directly
-#     macros, objects, extra_postargs, pp_opts, build = self._setup_compile(output_dir, macros, include_dirs, sources, depends, extra_postargs)
-#     cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
-#     # parallel code
-#     N=4 # number of parallel compilations
-#     import multiprocessing.pool
-#     def _single_compile(obj):
-#         try: src, ext = build[obj]
-#         except KeyError: return
-#         self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
-#     # convert to list, imap is evaluated on-demand
-#     list(multiprocessing.pool.ThreadPool(N).imap(_single_compile,objects))
-#     return objects
-# import distutils.ccompiler
-# distutils.ccompiler.CCompiler.compile=parallelCCompile
-
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
@@ -40,6 +22,7 @@ for dirpath, dirnames, filenames in os.walk("singleeyefitter"):
         dependencies.append(os.path.join(dirpath, filename))
 
 root_dir_include_path = "."
+detector_2d_include_path = "pupil_detectors/detector_2d"
 shared_cpp_include_path = "shared_cpp/include"
 singleeyefitter_include_path = "singleeyefitter/"
 
@@ -67,6 +50,7 @@ if platform.system() == "Windows":
 
     include_dirs = [spec[0] for spec in lib_spec]
     include_dirs.append(root_dir_include_path)
+    include_dirs.append(detector_2d_include_path)
     include_dirs.append(shared_cpp_include_path)
     include_dirs.append(singleeyefitter_include_path)
     xtra_obj2d = [spec[1] for spec in lib_spec]
@@ -112,6 +96,7 @@ else:
         "/usr/local/include/eigen3",
         "/usr/include/eigen3",
         root_dir_include_path,
+        detector_2d_include_path,
         shared_cpp_include_path,
         singleeyefitter_include_path,
     ] + opencv_include_dirs
@@ -119,11 +104,23 @@ else:
     xtra_obj2d = []
     library_dirs = opencv_library_dirs
 
+extra_compile_args = ["-D_USE_MATH_DEFINES", "-std=c++11", "-w", "-O2"]
+if platform.system() == "Windows":
+    # TODO: This is a quick and dirty fix for:
+    # https://github.com/pupil-labs/pupil/issues/1331 We should investigate this more
+    # and fix it correctly at some point.
+    extra_compile_args += ["-D_ENABLE_EXTENDED_ALIGNED_STORAGE"]
+
 extensions = [
     Extension(
-        name="pupil_detectors.detector_2d",
+        name="pupil_detectors.detector_base",
+        sources=["pupil_detectors/detector_base.pyx"],
+        language="c++",
+    ),
+    Extension(
+        name="pupil_detectors.detector_2d.detector_2d",
         sources=[
-            "pupil_detectors/detector_2d.pyx",
+            "pupil_detectors/detector_2d/detector_2d.pyx",
             "singleeyefitter/ImageProcessing/cvx.cpp",
             "singleeyefitter/utils.cpp",
             "singleeyefitter/detectorUtils.cpp",
@@ -132,20 +129,15 @@ extensions = [
         libraries=libs,
         library_dirs=library_dirs,
         extra_link_args=[],  # '-WL,-R/usr/local/lib'
-        extra_compile_args=[
-            "-D_USE_MATH_DEFINES",
-            "-std=c++11",
-            "-w",
-            "-O2",
-        ],  # ,'-O2'], #-w hides warnings
+        extra_compile_args=extra_compile_args,
         extra_objects=xtra_obj2d,
         depends=dependencies,
         language="c++",
     ),
     Extension(
-        name="pupil_detectors.detector_3d",
+        name="pupil_detectors.detector_3d.detector_3d",
         sources=[
-            "pupil_detectors/detector_3d.pyx",
+            "pupil_detectors/detector_3d/detector_3d.pyx",
             "singleeyefitter/ImageProcessing/cvx.cpp",
             "singleeyefitter/utils.cpp",
             "singleeyefitter/detectorUtils.cpp",
@@ -156,12 +148,7 @@ extensions = [
         libraries=libs,
         library_dirs=library_dirs,
         extra_link_args=[],  # '-WL,-R/usr/local/lib'
-        extra_compile_args=[
-            "-D_USE_MATH_DEFINES",
-            "-std=c++11",
-            "-w",
-            "-O2",
-        ],  # ,'-O2'], #-w hides warnings
+        extra_compile_args=extra_compile_args,
         extra_objects=xtra_obj2d,
         depends=dependencies,
         language="c++",
