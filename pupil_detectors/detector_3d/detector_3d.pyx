@@ -126,95 +126,87 @@ cdef class Detector3DCore(TemporalDetectorBase):
         cpp3DResult  = self.detector3DPtr.updateAndDetect(cpp2DResultPtr, self.properties, debug)
 
         height, width = gray_img.shape
-        pyResult = self.convertTo3DPythonResult(cpp3DResult, timestamp, width, height)
+        pyResult = result3D_to_dict(cpp3DResult, timestamp, width, height)
 
         if debug:
-            self.debug_result = self.prepareForVisualization3D(cpp3DResult)
+            self.debug_result = get_debug_info(cpp3DResult)
 
         return pyResult
 
 
-    cdef convertTo3DPythonResult(self, Detector3DResult& result, timestamp, width, height):
-        #use negative z-coordinates to get from left-handed to right-handed coordinate system
-        py_result = {}
+cdef object result3D_to_dict(Detector3DResult& result, timestamp, width, height):
+    # NOTE: flip z-coordinates to get from left-handed to right-handed coordinate system
 
-        circle = {}
-        circle['center'] =  (result.circle.center[0],-result.circle.center[1], result.circle.center[2])
-        circle['normal'] =  (result.circle.normal[0],-result.circle.normal[1], result.circle.normal[2])
-        circle['radius'] =  result.circle.radius
-        py_result['circle_3d'] = circle
+    data = {}
+    data["circle_3d"] = {
+        "center": (result.circle.center[0], -result.circle.center[1], result.circle.center[2]),
+        "normal": (result.circle.normal[0], -result.circle.normal[1], result.circle.normal[2]),
+        "radius": result.circle.radius,
+    }
+    data["confidence"] = result.confidence
+    data["timestamp"] = timestamp
+    data["diameter_3d"] = result.circle.radius * 2.0
 
+    data["ellipse"] = {
+        "center": (result.ellipse.center[0] + width / 2.0, height / 2.0 - result.ellipse.center[1]),
+        "axes": (result.ellipse.minor_radius * 2.0, result.ellipse.major_radius * 2.0),
+        "angle": result.ellipse.angle * 180.0 / PI - 90.0,
+    }
+    data["location"] = data["ellipse"]["center"]
+    data["diameter"] = max(data["ellipse"]["axes"])
+    data["diameter_3d"] = result.circle.radius * 2.0
 
-        py_result['confidence'] = result.confidence
-        py_result['timestamp'] = timestamp
-        py_result['diameter_3d'] = result.circle.radius * 2.0
+    data["sphere"] = {
+        "center": (result.sphere.center[0], -result.sphere.center[1], result.sphere.center[2]),
+        "radius": result.sphere.radius,
+    }
 
-        ellipse = {}
-        ellipse['center'] = (result.ellipse.center[0] + width / 2.0 ,height / 2.0  -  result.ellipse.center[1])
-        ellipse['axes'] =  (result.ellipse.minor_radius * 2.0 ,result.ellipse.major_radius * 2.0)
-        ellipse['angle'] = - (result.ellipse.angle * 180.0 / PI - 90.0)
-        py_result['ellipse'] = ellipse
-        # norm_center = normalize( ellipse['center'] , (width, height),flip_y=True)
-        # py_result['norm_pos'] = norm_center
-        py_result["location"] = ellipse['center']
-
-        py_result['diameter'] = max(ellipse['axes'])
-
-        sphere = {}
-        sphere['center'] =  (result.sphere.center[0],-result.sphere.center[1], result.sphere.center[2])
-        sphere['radius'] =  result.sphere.radius
-        py_result['sphere'] = sphere
-
-        if str(result.projectedSphere.center[0]) == 'nan':
-            projectedSphere = {'axes': (0.,0.), 'angle': 90.0, 'center': (0.,0.)}
-        else:
-            projectedSphere = {}
-            projectedSphere['center'] = (result.projectedSphere.center[0] + width / 2.0 ,height / 2.0  -  result.projectedSphere.center[1])
-            projectedSphere['axes'] =  (result.projectedSphere.minor_radius * 2.0 ,result.projectedSphere.major_radius * 2.0)
+    if str(result.projectedSphere.center[0]) == "nan":
+        data["projected_sphere"] = {
+            "axes": (0.,0.),
+            "angle": 90.0,
+            "center": (0.,0.),
+        }
+    else:
+        data["projected_sphere"] = {
+            "center": (result.projectedSphere.center[0] + width / 2.0, height / 2.0 - result.projectedSphere.center[1]),
+            "axes": (result.projectedSphere.minor_radius * 2.0, result.projectedSphere.major_radius * 2.0),
             #TODO result.projectedSphere.angle is always 0
-            projectedSphere['angle'] = - (result.projectedSphere.angle * 180.0 / PI - 90.0)
-        py_result['projected_sphere'] = projectedSphere
+            "angle": -(result.projectedSphere.angle * 180.0 / PI - 90.0),
+        }
 
-        py_result['model_confidence'] = result.modelConfidence
-        py_result['model_id'] = result.modelID
-        py_result['model_birth_timestamp'] = result.modelBirthTimestamp
+    data["model_confidence"] = result.modelConfidence
+    data["model_id"] = result.modelID
+    data["model_birth_timestamp"] = result.modelBirthTimestamp
 
+    coords = cart2sph(result.circle.normal)
+    if str(coords[0]) == "nan":
+        data["theta"] = 0.0
+        data["phi"] = 0.0
+    else:
+        data["theta"] = coords[0]
+        data["phi"] = coords[1]
 
-        coords = cart2sph(result.circle.normal)
-        if str(coords[0]) == 'nan':
-            py_result['theta'] = 0.0
-            py_result['phi'] = 0.0
-        else:
-            py_result['theta'] = coords[0]
-            py_result['phi'] = coords[1]
-        py_result['method'] = '3d c++'
+    return data
 
-        return py_result
-
-
-    cdef prepareForVisualization3D(self, Detector3DResult& result):
-
-        py_visualizationResult = {}
-
-        py_visualizationResult['edges'] = getEdges(result)
-        py_visualizationResult['circle'] = getCircle(result)
-        py_visualizationResult['predicted_circle'] = getPredictedCircle(result)
-
-        models = []
-        for model in result.models:
-            props = {}
-            props['bin_positions'] = getBinPositions(model)
-            props['sphere'] = getSphere(model)
-            props['initial_sphere'] = getInitialSphere(model)
-            props['maturity'] = model.maturity
-            props['solver_fit'] = model.solverFit
-            props['confidence'] = model.confidence
-            props['performance'] = model.performance
-            props['performance_gradient'] = model.performanceGradient
-            props['model_id'] = model.modelID
-            props['birth_timestamp'] = model.birthTimestamp
-            models.append(props)
-
-        py_visualizationResult['models'] = models
-
-        return py_visualizationResult
+cdef get_debug_info(Detector3DResult& result):
+    return {
+        "edges": getEdges(result),
+        "circle": getCircle(result),
+        "predicted_circle": getPredictedCircle(result),
+        "models": [
+            {
+                "bin_positions": getBinPositions(model),
+                "sphere": getSphere(model),
+                "initial_sphere": getInitialSphere(model),
+                "maturity": model.maturity,
+                "solver_fit": model.solverFit,
+                "confidence": model.confidence,
+                "performance": model.performance,
+                "performance_gradient": model.performanceGradient,
+                "model_id": model.modelID,
+                "birth_timestamp": model.birthTimestamp,
+            }
+            for model in result.models
+        ]
+    }

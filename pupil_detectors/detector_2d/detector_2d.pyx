@@ -116,17 +116,7 @@ cdef class Detector2DCore(DetectorBase):
         cppResultPtr = self.c_detect(gray_img, color_img, roi)
         result = deref(cppResultPtr)
 
-        result_data = {
-            "ellipse": {
-                "center": (result.ellipse.center[0], result.ellipse.center[1]),
-                "axes": (result.ellipse.minor_radius * 2.0 ,result.ellipse.major_radius * 2.0),
-                "angle": result.ellipse.angle * 180.0 / PI - 90.0
-            },
-        }
-        result_data["diameter"] = max(result_data["ellipse"]["axes"])
-        result_data["location"] = tuple(int(v) for v in result_data["ellipse"]["center"])
-        result_data["confidence"] = result.confidence
-        return result_data
+        return result2D_to_dict(result)
 
 
     cdef shared_ptr[Detector2DResult] c_detect(
@@ -208,3 +198,16 @@ cdef class Detector2DCore(DetectorBase):
         )
 
         return cppResultPtr
+
+
+cdef object result2D_to_dict(Detector2DResult& result):
+    data = {}
+    data["ellipse"] = {
+        "center": (result.ellipse.center[0], result.ellipse.center[1]),
+        "axes": (result.ellipse.minor_radius * 2.0, result.ellipse.major_radius * 2.0),
+        "angle": result.ellipse.angle * 180.0 / PI - 90.0
+    }
+    data["diameter"] = max(data["ellipse"]["axes"])
+    data["location"] = data["ellipse"]["center"]
+    data["confidence"] = result.confidence
+    return data
