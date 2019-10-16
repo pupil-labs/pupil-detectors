@@ -10,7 +10,7 @@ See COPYING and COPYING.LESSER for license details.
 """
 
 # cython: profile=False
-from .detector cimport (
+from .c_types_wrapper cimport (
     Matrix21d,
     Matrix31d,
     ModelDebugProperties,

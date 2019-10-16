@@ -16,7 +16,7 @@ from cython.operator cimport dereference as deref
 from numpy.math cimport PI
 
 from ..coarse_pupil cimport center_surround
-from ..detector cimport (
+from ..c_types_wrapper cimport (
     Detector3DResult,
     EyeModelFitter,
 )

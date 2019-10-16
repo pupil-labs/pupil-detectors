@@ -18,7 +18,7 @@ from libcpp.memory cimport shared_ptr
 from numpy.math cimport PI
 
 from ..coarse_pupil cimport center_surround
-from ..detector cimport (
+from ..c_types_wrapper cimport (
     CV_8UC1,
     CV_8UC3,
     Detector2D,
