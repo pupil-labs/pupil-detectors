@@ -15,12 +15,12 @@ import numpy as np
 from cython.operator cimport dereference as deref
 from numpy.math cimport PI
 
-from ..coarse_pupil cimport center_surround
 from ..c_types_wrapper cimport (
     Detector3DResult,
     EyeModelFitter,
     cart2sph,
 )
+from ..coarse_pupil cimport center_surround
 from ..cutils cimport (
     getBinPositions,
     getEdges,
@@ -29,7 +29,6 @@ from ..cutils cimport (
     getSphere,
     getInitialSphere,
 )
-
 from ..detector_base cimport TemporalDetectorBase
 from ..detector_2d.detector_2d cimport Detector2DCore
 from ..utils import Roi
