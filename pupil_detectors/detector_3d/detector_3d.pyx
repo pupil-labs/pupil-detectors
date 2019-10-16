@@ -161,7 +161,7 @@ cdef object result3D_to_dict(Detector3DResult& result, timestamp, width, height)
     data["ellipse"] = {
         "center": (result.ellipse.center[0] + width / 2.0, height / 2.0 - result.ellipse.center[1]),
         "axes": (result.ellipse.minor_radius * 2.0, result.ellipse.major_radius * 2.0),
-        "angle": result.ellipse.angle * 180.0 / PI - 90.0,
+        "angle": -(result.ellipse.angle * 180.0 / PI - 90.0),
     }
     data["location"] = data["ellipse"]["center"]
     data["diameter"] = max(data["ellipse"]["axes"])
