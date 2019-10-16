@@ -11,16 +11,9 @@ See COPYING and COPYING.LESSER for license details.
 
 # cython: profile=False
 from .c_types_wrapper cimport (
-    Matrix21d,
-    Matrix31d,
     ModelDebugProperties,
     Detector3DResult,
 )
-
-
-cdef extern from 'singleeyefitter/mathHelper.h' namespace 'singleeyefitter::math':
-    Matrix21d cart2sph( Matrix31d& m )
-
 
 cdef inline getBinPositions( ModelDebugProperties& result ):
     if result.binPositions.size() == 0:

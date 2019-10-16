@@ -29,25 +29,21 @@ cdef extern from '<opencv2/core.hpp>' namespace 'cv':
       Mat( int height, int width, int type, void* data  ) except+
       Mat( int height, int width, int type ) except+
 
-cdef extern from '<opencv2/core.hpp>' namespace 'cv':
-
   cdef cppclass Rect_[T]:
     Rect_() except +
     Rect_( T x, T y, T width, T height ) except +
     T x, y, width, height
 
-cdef extern from '<opencv2/core.hpp>' namespace 'cv':
-
   cdef cppclass Point_[T]:
     Point_() except +
-
-cdef extern from '<opencv2/core.hpp>' namespace 'cv':
 
   cdef cppclass Scalar_[T]:
     Scalar_() except +
     Scalar_( T x ) except +
 
+
 cdef extern from '<Eigen/Eigen>' namespace 'Eigen':
+
     cdef cppclass Matrix21d "Eigen::Matrix<double,2,1>": # eigen defaults to column major layout
         Matrix21d() except +
         double * data()
@@ -80,7 +76,7 @@ cdef extern from 'common/types.h':
         Matrix31d normal
         float radius
 
-        #typdefs
+    # typdefs
     ctypedef Matrix31d Vector3
     ctypedef Matrix21d Vector2
     ctypedef vector[vector[Vector3]] Contours3D
@@ -153,21 +149,16 @@ cdef extern from 'common/types.h':
         bool model_is_frozen
 
 
-
 cdef extern from 'detect_2d.hpp':
 
-
   cdef cppclass Detector2D:
-
     Detector2D() except +
     shared_ptr[Detector2DResult] detect( Detector2DProperties& prop, Mat& image, Mat& color_image, Mat& debug_image, Rect_[int]& roi, bint visualize , bint use_debug_image )
 
 
 cdef extern from "singleeyefitter/EyeModelFitter.h" namespace "singleeyefitter":
 
-
     cdef cppclass EyeModelFitter:
-
         cppclass PupilParams:
             float theta
             float psi
@@ -178,7 +169,6 @@ cdef extern from "singleeyefitter/EyeModelFitter.h" namespace "singleeyefitter":
             pair[Circle, Circle] mUnprojectedCirclePair
             Observation( shared_ptr[const Detector2DResult] observation, double focalLength)
 
-
         EyeModelFitter(double focalLength )
 
         Detector3DResult updateAndDetect( shared_ptr[Detector2DResult]& results, const Detector3DProperties& prop, bint fillDebugResult )
@@ -186,11 +176,10 @@ cdef extern from "singleeyefitter/EyeModelFitter.h" namespace "singleeyefitter":
         void reset()
         double getFocalLength()
 
-
         double mFocalLength
         Sphere[double] mCurrentSphere
 
 
+cdef extern from 'singleeyefitter/mathHelper.h' namespace 'singleeyefitter::math':
 
-
-
+    Matrix21d cart2sph( Matrix31d& m )

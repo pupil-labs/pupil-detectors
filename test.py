@@ -71,5 +71,6 @@ pprint(b.get_properties())
 
 # %% feed 10 images to 3D detector
 for t in range(10):
-    pprint(b.detect(gray, timestamp=t))
-
+    pprint(b.detect(gray, timestamp=t, debug=True))
+    pprint(b.debug_result)
+    pprint("==========================================================================")

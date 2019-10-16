@@ -19,9 +19,9 @@ from ..coarse_pupil cimport center_surround
 from ..c_types_wrapper cimport (
     Detector3DResult,
     EyeModelFitter,
+    cart2sph,
 )
 from ..cutils cimport (
-    cart2sph,
     getBinPositions,
     getEdges,
     getCircle,
