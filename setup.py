@@ -15,16 +15,21 @@ from Cython.Build import cythonize
 import numpy as np
 import os, sys, platform
 
+
+package_dir = "src"
+package = "pupil_detectors"
+
+
 dependencies = []
 # include all header files, to recognize changes
 for dirpath, dirnames, filenames in os.walk("singleeyefitter"):
     for filename in [f for f in filenames if f.endswith(".h")]:
         dependencies.append(os.path.join(dirpath, filename))
 
-root_dir_include_path = "."
-detector_2d_include_path = "pupil_detectors/detector_2d"
-shared_cpp_include_path = "shared_cpp/include"
-singleeyefitter_include_path = "singleeyefitter/"
+root_dir_include_path = package_dir
+detector_2d_include_path = f"{package_dir}/pupil_detectors/detector_2d"
+shared_cpp_include_path = f"{package_dir}/shared_cpp/include"
+singleeyefitter_include_path = f"{package_dir}/singleeyefitter/"
 
 
 if platform.system() == "Windows":
@@ -111,19 +116,20 @@ if platform.system() == "Windows":
     # and fix it correctly at some point.
     extra_compile_args += ["-D_ENABLE_EXTENDED_ALIGNED_STORAGE"]
 
+
 extensions = [
     Extension(
         name="pupil_detectors.detector_base",
-        sources=["pupil_detectors/detector_base.pyx"],
+        sources=[f"{package_dir}/pupil_detectors/detector_base.pyx"],
         language="c++",
     ),
     Extension(
         name="pupil_detectors.detector_2d.detector_2d",
         sources=[
-            "pupil_detectors/detector_2d/detector_2d.pyx",
-            "singleeyefitter/ImageProcessing/cvx.cpp",
-            "singleeyefitter/utils.cpp",
-            "singleeyefitter/detectorUtils.cpp",
+            f"{package_dir}/pupil_detectors/detector_2d/detector_2d.pyx",
+            f"{package_dir}/singleeyefitter/ImageProcessing/cvx.cpp",
+            f"{package_dir}/singleeyefitter/utils.cpp",
+            f"{package_dir}/singleeyefitter/detectorUtils.cpp",
         ],
         include_dirs=include_dirs,
         libraries=libs,
@@ -137,12 +143,12 @@ extensions = [
     Extension(
         name="pupil_detectors.detector_3d.detector_3d",
         sources=[
-            "pupil_detectors/detector_3d/detector_3d.pyx",
-            "singleeyefitter/ImageProcessing/cvx.cpp",
-            "singleeyefitter/utils.cpp",
-            "singleeyefitter/detectorUtils.cpp",
-            "singleeyefitter/EyeModelFitter.cpp",
-            "singleeyefitter/EyeModel.cpp",
+            f"{package_dir}/pupil_detectors/detector_3d/detector_3d.pyx",
+            f"{package_dir}/singleeyefitter/ImageProcessing/cvx.cpp",
+            f"{package_dir}/singleeyefitter/utils.cpp",
+            f"{package_dir}/singleeyefitter/detectorUtils.cpp",
+            f"{package_dir}/singleeyefitter/EyeModelFitter.cpp",
+            f"{package_dir}/singleeyefitter/EyeModel.cpp",
         ],
         include_dirs=include_dirs,
         libraries=libs,
@@ -155,11 +161,15 @@ extensions = [
     ),
 ]
 
+package_dir = "src"
+package = "pupil_detectors"
+
 if __name__ == "__main__":
     setup(
-        name="pupil_detectors",
+        name="pupil-detectors",
         version="0.2",
-        packages=["pupil_detectors"],
+        packages=[package],
+        package_dir={"": package_dir},
         url="https://github.com/pupil-labs/pupil-detectors",
         author="Pupil Labs",
         author_email="info@pupil-labs.com",
