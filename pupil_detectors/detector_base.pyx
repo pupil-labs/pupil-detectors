@@ -37,7 +37,7 @@ cdef class DetectorBase:
         raise NotImplementedError()
 
     def get_properties(self) -> NamespacedProperties:
-        """Returns properties and values of the detector."""
+        """Returns a copy of the properties and values of the detector."""
         raise NotImplementedError()
 
     def update_properties(self, properties: NamespacedProperties) -> None:

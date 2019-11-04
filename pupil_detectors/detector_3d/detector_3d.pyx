@@ -100,7 +100,7 @@ cdef class Detector3DCore(TemporalDetectorBase):
 
     def get_properties(self):
         all_properties = self.detector2D.get_properties()
-        all_properties["3d"] = self.properties
+        all_properties["3d"] = self.properties.copy()
         return all_properties
 
     def update_properties(self, properties):

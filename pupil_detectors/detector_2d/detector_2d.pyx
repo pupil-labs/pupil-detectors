@@ -76,7 +76,7 @@ cdef class Detector2DCore(DetectorBase):
         return ["2d"]
 
     def get_properties(self):
-        return {"2d": self.properties}
+        return {"2d": self.properties.copy()}
 
     def update_properties(self, properties):
         relevant_properties = properties.get("2d", {})
