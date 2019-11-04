@@ -39,7 +39,7 @@ cdef class Detector2DCore(DetectorBase):
         del self.thisptr
 
     def __init__(self, properties = None):
-        # initialize with defaults first and then set_properties to use type checking
+        # initialize with defaults first and then update
         self.properties = self.get_default_properties()
         if properties is not None:
             self.update_properties(properties)
