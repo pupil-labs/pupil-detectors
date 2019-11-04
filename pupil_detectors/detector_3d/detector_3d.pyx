@@ -100,7 +100,7 @@ cdef class Detector3DCore(TemporalDetectorBase):
 
     def get_properties(self):
         all_properties = self.detector2D.get_properties()
-        all_properties["3d"] = self.properties
+        all_properties["3d"] = self.properties.copy()
         return all_properties
 
     def update_properties(self, properties):
@@ -110,12 +110,13 @@ cdef class Detector3DCore(TemporalDetectorBase):
             if key not in self.properties:
                 continue
             expected_type = type(self.properties[key])
-            if type(value) != expected_type:
+            try:
+                self.properties[key] = expected_type(value)
+            except ValueError as e:
                 raise ValueError(
-                    f"Property value {repr(value)} "
-                    f"does not match expected type: {expected_type}"
-                )
-            self.properties[key] = value
+                    f"Value `{repr(value)}` for property `3d.{key}`"
+                    f" could not be converted to expected type: {expected_type}"
+                ) from e
 
 
     ##### Core API

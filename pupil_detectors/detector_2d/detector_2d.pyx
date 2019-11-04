@@ -39,7 +39,7 @@ cdef class Detector2DCore(DetectorBase):
         del self.thisptr
 
     def __init__(self, properties = None):
-        # initialize with defaults first and then set_properties to use type checking
+        # initialize with defaults first and then update
         self.properties = self.get_default_properties()
         if properties is not None:
             self.update_properties(properties)
@@ -76,7 +76,7 @@ cdef class Detector2DCore(DetectorBase):
         return ["2d"]
 
     def get_properties(self):
-        return {"2d": self.properties}
+        return {"2d": self.properties.copy()}
 
     def update_properties(self, properties):
         relevant_properties = properties.get("2d", {})
@@ -84,12 +84,13 @@ cdef class Detector2DCore(DetectorBase):
             if key not in self.properties:
                 continue
             expected_type = type(self.properties[key])
-            if type(value) != expected_type:
+            try:
+                self.properties[key] = expected_type(value)
+            except ValueError as e:
                 raise ValueError(
-                    f"Property value {repr(value)} "
-                    f"does not match expected type: {expected_type}"
-                )
-            self.properties[key] = value
+                    f"Value `{repr(value)}` for property `2d.{key}`"
+                    f" could not be converted to expected type: {expected_type}"
+                ) from e
 
     def detect(
         self,
