@@ -16,53 +16,58 @@ import sysconfig
 import numpy as np
 from Cython.Build import cythonize
 from setuptools import find_packages, setup, Extension
+from pathlib import Path
 
 package_dir = "src"
 package = "pupil_detectors"
 
+########################################################################################
+# Setup Libraries
 
-dependencies = []
-# include all header files, to recognize changes
-for dirpath, dirnames, filenames in os.walk(f"{package_dir}/singleeyefitter/"):
-    for filename in [f for f in filenames if f.endswith(".h")]:
-        dependencies.append(os.path.join(dirpath, filename))
+include_dirs = []
+libraries = []
+library_dirs = []
 
-root_dir_include_path = package_dir
-detector_2d_include_path = f"{package_dir}/pupil_detectors/detector_2d"
-shared_cpp_include_path = f"{package_dir}/shared_cpp/include"
-singleeyefitter_include_path = f"{package_dir}/singleeyefitter/"
+# Cross-platform setup
+include_dirs += [
+    package_dir,
+    f"{package_dir}/pupil_detectors/detector_2d",
+    f"{package_dir}/shared_cpp/include",
+    f"{package_dir}/singleeyefitter/",
+    np.get_include(),
+]
 
-
+# Platform-specific setup
 if platform.system() == "Windows":
-    libs = []
-    library_dirs = []
-    lib_spec = [
-        [np.get_include(), ""],
-        [
-            "C:\\work\\opencv\\build\\include",
-            "C:\\work\\opencv\\build\\x64\\vc14\\lib\\opencv_world345.lib",
-        ],
-        ["C:\\work\\ceres-windows\\Eigen", ""],
-        [
-            "C:\\work\\ceres-windows\\ceres-solver\\include",
-            "C:\\work\\ceres-windows\\x64\\Release\\ceres_static.lib",
-        ],
-        [
-            "C:\\work\\ceres-windows\\glog\\src\\windows",
-            "C:\\work\\ceres-windows\\x64\\Release\\libglog_static.lib",
-        ],
-        ["C:\\work\\ceres-windows", ""],
-    ]
+    OPENCV = "C:\\work\\opencv\\build"
+    include_dirs.append(f"{OPENCV}\\include")
+    library_dirs.append(f"{OPENCV}\\x64\\vc14\\lib")
+    libraries.append("opencv_world345")
 
-    include_dirs = [spec[0] for spec in lib_spec]
-    include_dirs.append(root_dir_include_path)
-    include_dirs.append(detector_2d_include_path)
-    include_dirs.append(shared_cpp_include_path)
-    include_dirs.append(singleeyefitter_include_path)
-    xtra_obj2d = [spec[1] for spec in lib_spec]
+    EIGEN = "C:\\work\\ceres-windows\\Eigen"
+    include_dirs.append(f"{EIGEN}")
+
+    CERES = "C:\\work\\ceres-windows"
+    # NOTE: ceres for windows needs to link against glog
+    include_dirs.append(f"{CERES}")
+    include_dirs.append(f"{CERES}\\ceres-solver\\include")
+    include_dirs.append(f"{CERES}\\glog\\src\\windows")
+    library_dirs.append(f"{CERES}\\x64\\Release")
+    libraries.append("ceres_static")
+    libraries.append("libglog_static")
 
 else:
-    # opencv3 - highgui module has been split into parts: imgcodecs, videoio, and highgui itself
+    # Opencv
+    opencv_include_dirs = [
+        "/usr/local/opt/opencv/include",  # old opencv brew (v3)
+        "/usr/local/opt/opencv@3/include",  # new opencv@3 brew
+        "/usr/local/include/opencv4",  # new opencv brew (v4)
+    ]
+    opencv_library_dirs = [
+        "/usr/local/opt/opencv/lib",  # old opencv brew (v3)
+        "/usr/local/opt/opencv@3/lib",  # new opencv@3 brew
+        "/usr/local/lib",  # new opencv brew (v4)
+    ]
     opencv_libraries = [
         "opencv_core",
         "opencv_highgui",
@@ -71,18 +76,7 @@ else:
         "opencv_imgproc",
         "opencv_video",
     ]
-
-    # explicit lib and include dirs for homebrew installed opencv
-    opencv_library_dirs = [
-        "/usr/local/opt/opencv/lib",  # old opencv brew (v3)
-        "/usr/local/opt/opencv@3/lib",  # new opencv@3 brew
-        "/usr/local/lib",  # new opencv brew (v4)
-    ]
-    opencv_include_dirs = [
-        "/usr/local/opt/opencv/include",  # old opencv brew (v3)
-        "/usr/local/opt/opencv@3/include",  # new opencv@3 brew
-        "/usr/local/include/opencv4",  # new opencv brew (v4)
-    ]
+    # Check if OpenCV has been installed through ROS
     opencv_core_found = any(
         os.path.isfile(path + "/libopencv_core.so") for path in opencv_library_dirs
     )
@@ -97,32 +91,54 @@ else:
                 ]
                 opencv_libraries = [lib + "3" for lib in opencv_libraries]
                 break
-    include_dirs = [
-        np.get_include(),
+    include_dirs += opencv_include_dirs
+    library_dirs += opencv_library_dirs
+    libraries += opencv_libraries
+
+    # Eigen
+    include_dirs += [
         "/usr/local/include/eigen3",
         "/usr/include/eigen3",
-        root_dir_include_path,
-        detector_2d_include_path,
-        shared_cpp_include_path,
-        singleeyefitter_include_path,
-    ] + opencv_include_dirs
-    libs = ["ceres"] + opencv_libraries
-    xtra_obj2d = []
-    library_dirs = opencv_library_dirs
+    ]
 
-extra_compile_args = ["-D_USE_MATH_DEFINES", "-std=c++11", "-w", "-O2"]
+    # Ceres
+    libraries.append("ceres")
+
+########################################################################################
+# Setup Compile Args
+
+extra_compile_args = []
+extra_compile_args += [
+    "-w",  # suppress all warnings (TODO: Why do we do this?)
+]
 if platform.system() == "Windows":
-    # TODO: This is a quick and dirty fix for:
-    # https://github.com/pupil-labs/pupil/issues/1331 We should investigate this more
-    # and fix it correctly at some point.
-    extra_compile_args += ["-D_ENABLE_EXTENDED_ALIGNED_STORAGE"]
+    # NOTE: c++11 is not available as compiler flag on MSVC
+    extra_compile_args += [
+        "-O2",  # best speed optimization for MSVC
+        "-D_USE_MATH_DEFINES",  # for M_PI
+        # TODO: This is a quick and dirty fix for:
+        # https://github.com/pupil-labs/pupil/issues/1331 We should investigate this more
+        # and fix it correctly at some point.
+        "-D_ENABLE_EXTENDED_ALIGNED_STORAGE",
+    ]
+else:
+    extra_compile_args += [
+        "-std=c++11",
+        # apply all recommended speed optimization (note -O3 is typically not recommeded
+        # as it heavily relies on well-written code)
+        "-O2",
+    ]
 
+
+########################################################################################
+# Extension specs
 
 extensions = [
     Extension(
         name="pupil_detectors.detector_base",
         sources=[f"{package_dir}/pupil_detectors/detector_base.pyx"],
         language="c++",
+        extra_compile_args=extra_compile_args,
     ),
     Extension(
         name="pupil_detectors.detector_2d.detector_2d",
@@ -132,14 +148,11 @@ extensions = [
             f"{package_dir}/singleeyefitter/utils.cpp",
             f"{package_dir}/singleeyefitter/detectorUtils.cpp",
         ],
-        include_dirs=include_dirs,
-        libraries=libs,
-        library_dirs=library_dirs,
-        extra_link_args=[],  # '-WL,-R/usr/local/lib'
-        extra_compile_args=extra_compile_args,
-        extra_objects=xtra_obj2d,
-        depends=dependencies,
         language="c++",
+        include_dirs=include_dirs,
+        libraries=libraries,
+        library_dirs=library_dirs,
+        extra_compile_args=extra_compile_args,
     ),
     Extension(
         name="pupil_detectors.detector_3d.detector_3d",
@@ -151,18 +164,27 @@ extensions = [
             f"{package_dir}/singleeyefitter/EyeModelFitter.cpp",
             f"{package_dir}/singleeyefitter/EyeModel.cpp",
         ],
-        include_dirs=include_dirs,
-        libraries=libs,
-        library_dirs=library_dirs,
-        extra_link_args=[],  # '-WL,-R/usr/local/lib'
-        extra_compile_args=extra_compile_args,
-        extra_objects=xtra_obj2d,
-        depends=dependencies,
         language="c++",
+        include_dirs=include_dirs,
+        libraries=libraries,
+        library_dirs=library_dirs,
+        extra_compile_args=extra_compile_args,
     ),
 ]
+########################################################################################
+# Setup Script
 
-package_dir = "src"
+print("INCLUDE DIRS:")
+print(*(f" - {v}\n" for v in include_dirs), sep="")
+
+print("LIBRARY DIRS:")
+print(*(f" - {v}\n" for v in library_dirs), sep="")
+
+print("LIBRARIES:")
+print(*(f" - {v}\n" for v in libraries), sep="")
+
+print("COMPILE ARGS:")
+print(*(f" - {v}\n" for v in extra_compile_args), sep="")
 
 if __name__ == "__main__":
     setup(
