@@ -1,8 +1,6 @@
 .o
 src/pupil_detectors/**/*.so
 src/pupil_detectors/**/*.cpp
-eye_model_3d.cpp
-eye_model_3d.c
 build/
 __pycache__/
 *egg-info/
