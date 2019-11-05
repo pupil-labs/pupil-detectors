@@ -9,12 +9,13 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-from distutils.core import setup
-from distutils.extension import Extension
-from Cython.Build import cythonize
-import numpy as np
-import os, sys, platform
+import os
+import platform
+import sysconfig
 
+import numpy as np
+from Cython.Build import cythonize
+from setuptools import find_packages, setup, Extension
 
 package_dir = "src"
 package = "pupil_detectors"
@@ -22,7 +23,7 @@ package = "pupil_detectors"
 
 dependencies = []
 # include all header files, to recognize changes
-for dirpath, dirnames, filenames in os.walk("singleeyefitter"):
+for dirpath, dirnames, filenames in os.walk(f"{package_dir}/singleeyefitter/"):
     for filename in [f for f in filenames if f.endswith(".h")]:
         dependencies.append(os.path.join(dirpath, filename))
 
@@ -162,13 +163,12 @@ extensions = [
 ]
 
 package_dir = "src"
-package = "pupil_detectors"
 
 if __name__ == "__main__":
     setup(
         name="pupil-detectors",
         version="0.2",
-        packages=[package],
+        packages=find_packages(package_dir),
         package_dir={"": package_dir},
         url="https://github.com/pupil-labs/pupil-detectors",
         author="Pupil Labs",
