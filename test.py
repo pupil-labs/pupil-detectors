@@ -18,12 +18,6 @@ a.update_properties({"3d": {"blur_size": 10}})
 a.update_properties({"2d": {"dummy": 42}})
 pprint(a.get_properties())
 
-try:
-    a.update_properties({"2d": {"blur_size": 1.0}})
-    assert False, "This should crash"
-except ValueError as e:
-    pprint(e)
-
 props = a.get_properties()
 a = pupil_detectors.Detector2D(props)
 pprint(a.get_properties())
@@ -74,3 +68,6 @@ for t in range(10):
     pprint(b.detect(gray, timestamp=t, debug=True))
     pprint(b.debug_result)
     pprint("==========================================================================")
+
+
+# %%
