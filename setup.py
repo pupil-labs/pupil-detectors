@@ -133,6 +133,12 @@ else:
 ########################################################################################
 # Extension specs
 
+# TODO: Cython recommends to include the generated cpp files in the source distribution
+# and try to build from those first, only regenerating the cpp files from cython as a
+# fallback. We don't do this currently, but since we are going to ship wheels, it won't
+# be so bad since most users can just install the wheels. Read about this here:
+# https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#distributing-cython-modules
+
 extensions = [
     Extension(
         name="pupil_detectors.detector_base",

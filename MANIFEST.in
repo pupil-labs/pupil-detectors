@@ -1,5 +1,12 @@
 include setup.py
 include pyproject.toml
 
+# include all cython files as well as the 2D detector hpp
+recursive-include src/pupil_detectors *.pxd *.pyx *.hpp
+
+# c++ requirements
+graft src/shared_cpp
+graft src/singleeyefitter
+
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
