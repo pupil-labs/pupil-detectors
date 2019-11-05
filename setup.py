@@ -21,6 +21,11 @@ from pathlib import Path
 package_dir = "src"
 package = "pupil_detectors"
 
+install_requires = [
+    "numpy",
+    "opencv-python",
+]
+
 ########################################################################################
 # Setup Libraries
 
@@ -194,13 +199,15 @@ print(*(f" - {v}\n" for v in extra_compile_args), sep="")
 
 if __name__ == "__main__":
     setup(
+        author="Pupil Labs",
+        author_email="info@pupil-labs.com",
+        extras_require={"dev": ["pytest", "tox"]},
+        ext_modules=cythonize(extensions, quiet=True, nthreads=8),
+        install_requires=install_requires,
+        license="GNU",
         name="pupil-detectors",
-        version="0.2",
         packages=find_packages(package_dir),
         package_dir={"": package_dir},
         url="https://github.com/pupil-labs/pupil-detectors",
-        author="Pupil Labs",
-        author_email="info@pupil-labs.com",
-        license="GNU",
-        ext_modules=cythonize(extensions, quiet=True, nthreads=8),
+        version="0.2",
     )
