@@ -12,9 +12,10 @@ See COPYING and COPYING.LESSER for license details.
 import platform
 
 if platform.system() == "Windows":
-    import os
-
     # On Windows wheels we ship custom opencv DLLs that we need to inject into PATH
+    import os
+    from pathlib import Path
+
     data_path = Path(__file__).parent / ".package_data"
     os.environ["PATH"] = str(data_path.resolve()) + os.pathsep + os.environ["PATH"]
 
