@@ -9,6 +9,16 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
+import platform
+
+if platform.system() == "Windows":
+    import os
+
+    # On Windows wheels we ship custom opencv DLLs that we need to inject into PATH
+    data_path = Path(__file__).parent / ".package_data"
+    os.environ["PATH"] = str(data_path.resolve()) + os.pathsep + os.environ["PATH"]
+
+
 from .utils import Roi
 from .detector_base import DetectorBase
 from .detector_2d import Detector2D
