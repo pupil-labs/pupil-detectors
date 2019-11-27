@@ -114,7 +114,7 @@ else:
 
 extra_compile_args = []
 extra_compile_args += [
-    "-w",  # suppress all warnings (TODO: Why do we do this?)
+    "-w",  # suppress all warnings (we get a lot of warnings from the c++ code)
 ]
 if platform.system() == "Windows":
     # NOTE: c++11 is not available as compiler flag on MSVC
@@ -184,18 +184,6 @@ extensions = [
 ]
 ########################################################################################
 # Setup Script
-
-print("INCLUDE DIRS:")
-print(*(f" - {v}\n" for v in include_dirs), sep="")
-
-print("LIBRARY DIRS:")
-print(*(f" - {v}\n" for v in library_dirs), sep="")
-
-print("LIBRARIES:")
-print(*(f" - {v}\n" for v in libraries), sep="")
-
-print("COMPILE ARGS:")
-print(*(f" - {v}\n" for v in extra_compile_args), sep="")
 
 if __name__ == "__main__":
     setup(
