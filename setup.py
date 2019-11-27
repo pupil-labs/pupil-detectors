@@ -197,5 +197,5 @@ if __name__ == "__main__":
         packages=find_packages(package_dir),
         package_dir={"": package_dir},
         url="https://github.com/pupil-labs/pupil-detectors",
-        version="0.2",
+        version="0.3.0",
     )
