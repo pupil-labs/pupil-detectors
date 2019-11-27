@@ -9,14 +9,17 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
+import ctypes.util
 import os
 import platform
+import shutil
 import sysconfig
+from contextlib import contextmanager
+from pathlib import Path
 
 import numpy as np
 from Cython.Build import cythonize
-from setuptools import find_packages, setup, Extension
-from pathlib import Path
+from setuptools import Extension, find_packages, setup
 
 package_dir = "src"
 package = "pupil_detectors"
@@ -32,6 +35,28 @@ install_requires = [
 include_dirs = []
 libraries = []
 library_dirs = []
+external_package_data = []
+
+
+@contextmanager
+def collect_external_package_data(external_package_data):
+    # Temporarily copies external package data into the package and removes it again.
+    # This function can be wrapped around setup(). Package data will onyl be used for
+    # wheels though.
+    root = Path(__file__).parent
+    temp_path = root / package_dir / package / ".package_data"
+    temp_path.mkdir(exist_ok=True)
+
+    collected_data = []
+    for raw_file in external_package_data:
+        raw_file_path = Path(raw_file)
+        shutil.copy(raw_file_path, temp_path)
+        collected_data.append(str((temp_path / raw_file_path.name).resolve()))
+
+    yield collected_data
+
+    shutil.rmtree(temp_path)
+
 
 # Cross-platform setup
 include_dirs += [
@@ -42,12 +67,19 @@ include_dirs += [
     np.get_include(),
 ]
 
+
 # Platform-specific setup
 if platform.system() == "Windows":
     OPENCV = "C:\\work\\opencv\\build"
+    OPENCV_VERSION = "345"
     include_dirs.append(f"{OPENCV}\\include")
     library_dirs.append(f"{OPENCV}\\x64\\vc14\\lib")
-    libraries.append("opencv_world345")
+    libraries.append(f"opencv_world{OPENCV_VERSION}")
+    # We want to ship opencv in windows wheels, so that we don't have any external
+    # dependencies. Ceres is statically compiled and opencv will be supplied.
+    external_package_data.append(
+        ctypes.util.find_library(f"opencv_world{OPENCV_VERSION}")
+    )
 
     EIGEN = "C:\\work\\ceres-windows\\Eigen"
     include_dirs.append(f"{EIGEN}")
@@ -143,6 +175,7 @@ else:
 # fallback. We don't do this currently, but since we are going to ship wheels, it won't
 # be so bad since most users can just install the wheels. Read about this here:
 # https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#distributing-cython-modules
+# Also: Does that mean we have to store the generated cpp files in git?
 
 extensions = [
     Extension(
@@ -186,16 +219,18 @@ extensions = [
 # Setup Script
 
 if __name__ == "__main__":
-    setup(
-        author="Pupil Labs",
-        author_email="info@pupil-labs.com",
-        extras_require={"dev": ["pytest", "tox"]},
-        ext_modules=cythonize(extensions, quiet=True, nthreads=8),
-        install_requires=install_requires,
-        license="GNU",
-        name="pupil-detectors",
-        packages=find_packages(package_dir),
-        package_dir={"": package_dir},
-        url="https://github.com/pupil-labs/pupil-detectors",
-        version="0.3.0",
-    )
+    with collect_external_package_data(external_package_data) as package_data:
+        setup(
+            author="Pupil Labs",
+            author_email="info@pupil-labs.com",
+            extras_require={"dev": ["pytest", "tox"]},
+            ext_modules=cythonize(extensions, quiet=True, nthreads=8),
+            install_requires=install_requires,
+            license="GNU",
+            name="pupil-detectors",
+            packages=find_packages(package_dir),
+            package_data={package: package_data},
+            package_dir={"": package_dir},
+            url="https://github.com/pupil-labs/pupil-detectors",
+            version="0.3.0",
+        )
