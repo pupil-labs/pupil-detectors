@@ -72,14 +72,19 @@ include_dirs += [
 if platform.system() == "Windows":
     OPENCV = "C:\\work\\opencv\\build"
     OPENCV_VERSION = "345"
+    OPENCV_DLL_NAME = f"opencv_world{OPENCV_VERSION}"
     include_dirs.append(f"{OPENCV}\\include")
     library_dirs.append(f"{OPENCV}\\x64\\vc14\\lib")
-    libraries.append(f"opencv_world{OPENCV_VERSION}")
+    libraries.append(OPENCV_DLL_NAME)
     # We want to ship opencv in windows wheels, so that we don't have any external
     # dependencies. Ceres is statically compiled and opencv will be supplied.
-    external_package_data.append(
-        ctypes.util.find_library(f"opencv_world{OPENCV_VERSION}")
-    )
+    opencv_dll = ctypes.util.find_library(OPENCV_DLL_NAME)
+    if opencv_dll is None:
+        raise FileNotFoundError(
+            f"Could not find {OPENCV_DLL_NAME}.dll."
+            f" Please add the location to your PATH!"
+        )
+    external_package_data.append(opencv_dll)
 
     EIGEN = "C:\\work\\ceres-windows\\Eigen"
     include_dirs.append(f"{EIGEN}")
