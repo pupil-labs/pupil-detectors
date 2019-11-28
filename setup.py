@@ -51,7 +51,11 @@ def collect_external_package_data(external_package_data):
     for raw_file in external_package_data:
         raw_file_path = Path(raw_file)
         shutil.copy(raw_file_path, temp_path)
-        collected_data.append(str((temp_path / raw_file_path.name).resolve()))
+        # NOTE: This needs to be separated by forward-slashes '/' otherwise it will not
+        # work! See # https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
+        collected_data.append(f".package_data/{raw_file_path.name}")
+        if not (temp_path / raw_file_path.name).exists():
+            raise FileNotFoundError(f"Could not copy data file {raw_file_path.name}")
 
     yield collected_data
 
