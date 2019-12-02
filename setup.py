@@ -26,8 +26,16 @@ package = "pupil_detectors"
 
 install_requires = [
     "numpy",
-    "opencv-python",
 ]
+
+if platform.system() == "Windows":
+    # The prebuilt versions of opencv for Windows do not contain python bindings. For
+    # ease of use we install these via pip. On Unix we get cv2 from the documented ways
+    # of installing opencv with python bindings.
+    install_requires.append("opencv-python")
+else:
+    # Better cython interfacing, not available for windows.
+    install_requires.append("cysignals")
 
 ########################################################################################
 # Setup Libraries
