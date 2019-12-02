@@ -9,3 +9,4 @@ __pycache__/
 .tox
 .venv
 .pytest_cache
+.python-version
