@@ -235,19 +235,36 @@ extensions = [
 ########################################################################################
 # Setup Script
 
+with open("README.md") as readme_file:
+    readme = readme_file.read()
+
 if __name__ == "__main__":
     with collect_external_package_data(external_package_data) as package_data:
         setup(
-            author="Pupil Labs",
-            author_email="info@pupil-labs.com",
+            author="Pupil Labs GmbH",
+            author_email="pypi@pupil-labs.com",
+            classifiers=[
+                "Development Status :: 4 - Beta",
+                "Intended Audience :: Developers",
+                "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+                "Natural Language :: English",
+                "Programming Language :: C++",
+                "Programming Language :: Cython",
+                "Programming Language :: Python :: 3",
+                "Topic :: Scientific/Engineering",
+            ],
+            description="Pupil detectors",
             extras_require={"dev": ["pytest", "tox"]},
             ext_modules=cythonize(extensions, quiet=True, nthreads=8),
             install_requires=install_requires,
             license="GNU",
+            long_description=readme,
+            long_description_content_type="text/markdown",
             name="pupil-detectors",
             packages=find_packages(package_dir),
             package_data={package: package_data},
             package_dir={"": package_dir},
             url="https://github.com/pupil-labs/pupil-detectors",
             version="0.3.0",
+            zip_save=False,
         )
