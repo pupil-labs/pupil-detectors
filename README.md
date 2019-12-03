@@ -5,7 +5,6 @@ This is a python-package containing standalone pupil detectors for the [Pupil-La
 - Detector2D
 - Detector3D
 
-<!--
 ## Installation
 
 ### macOS and Linux
@@ -22,17 +21,7 @@ Since the dependency setup is very complex on Windows, we provide prebuilt-wheel
 pip install pupil-detectors
 ```
 If you don't want to use our prebuilt versions, see the section **Building from Source** further below.
--->
 
-
-## Installation
-
-**WORK IN PROGRESS**
-
-Install all dependencies that are needed to run Pupil from source. See guides on [the Pupil GitHub page](https://github.com/pupil-labs/pupil#installing-dependencies). Then:
-```bash
-pip install git+https://github.com/pupil-labs/pupil-detectors.git@make-pip-installable
-```
 
 ## Usage
 
