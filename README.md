@@ -5,15 +5,27 @@ This is a python-package containing standalone pupil detectors for the [Pupil-La
 - Detector2D
 - Detector3D
 
+<!--
 ## Installation (wheels)
 
-This package has a couple of non-python dependencies that you will have to install yourself. To make this easier, we provide prebuilt-wheels for major operating systems, containing some of the dependencies already.
+This package has a couple of non-python dependencies that you will have to install yourself.
+Since the setup is very complex on **Windows**, we provide prebuilt-wheels, containing prebuilt versions of all dependencies already.
 
-Since pupil-detectors use some shared libraries, you will have to make sure those are installed. Until we have a clear description on how to install the necessary requirements for every platform, we assume you are using **pupil-detectors** in the context of the Pupil-Labs software stack. In this case you should have all necessary dependencies set up already. You can find the dependencies for Pupil on [the Pupil GitHub page](https://github.com/pupil-labs/pupil#installing-dependencies). Not all of them are necessary for **pupil-detectors** and we are working on specific install instructions only for this package.
+For **maxOS** and **Linux**, you will have to make sure those are installed. Until we have a clear description on how to install the necessary requirements for every platform, we assume you are using **pupil-detectors** in the context of the Pupil-Labs software stack. In this case you should have all necessary dependencies set up already. You can find the dependencies for Pupil on [the Pupil GitHub page](https://github.com/pupil-labs/pupil#installing-dependencies). Not all of them are necessary for **pupil-detectors** and we are working on specific install instructions only for this package.
 
 When you have all nessecary dependencies, you can install **pupil-detectors** with
 ```bash
 pip install pupil-detectors
+```
+-->
+
+## Installation
+
+**WORK IN PROGRESS**
+
+Install all dependencies that are needed to run Pupil from source. See guides on [the Pupil GitHub page](https://github.com/pupil-labs/pupil#installing-dependencies). Then:
+```bash
+pip install git+https://github.com/pupil-labs/pupil-detectors.git@make-pip-installable
 ```
 
 ## Usage
