@@ -9,6 +9,8 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
+__version__ = "0.3.0"
+
 import platform
 
 if platform.system() == "Windows":
