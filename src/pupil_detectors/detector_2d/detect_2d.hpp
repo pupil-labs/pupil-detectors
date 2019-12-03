@@ -203,7 +203,8 @@ std::shared_ptr<Detector2DResult> Detector2D::detect(Detector2DProperties& props
 	    support_pixels = ellipse_true_support(props,ellipse, ellipse_circumference, raw_edges);
 	    double support_ratio = support_pixels.size() / ellipse_circumference;
 
-	    if(support_ratio >= props.strong_perimeter_ratio_range_min){
+		// fitEllipse crashes for < 5 points
+	    if(support_pixels.size() >= 5 && support_ratio >= props.strong_perimeter_ratio_range_min){
 	      	cv::RotatedRect refit_ellipse = cv::fitEllipse(support_pixels);
 
 			if(use_debug_image){
@@ -371,6 +372,13 @@ std::shared_ptr<Detector2DResult> Detector2D::detect(Detector2DProperties& props
 						test_contour_indices.insert(mapping.at(k));
 					}
 
+					if (test_contour.size() < 5)
+					{
+						// fitEllipse (in contour_ellipse_deviation_variance) crashes for < 5 points
+						prune.push_back(current_path);
+						continue;
+					}
+
 					//we have not tested this and a subset of this was sucessfull before
 					double fit_variance = detector::contour_ellipse_deviation_variance(test_contour);
 
@@ -461,6 +469,11 @@ std::shared_ptr<Detector2DResult> Detector2D::detect(Detector2DProperties& props
 
 		}
 
+		if (test_contour.size() < 5)
+		{
+			// fitEllipse crashes for < 5 points
+			continue;
+		}
 		auto cv_ellipse = cv::fitEllipse(test_contour);
 
 		if (use_debug_image) {
@@ -517,6 +530,14 @@ std::shared_ptr<Detector2DResult> Detector2D::detect(Detector2DProperties& props
 		best_contour.insert(best_contour.end(), c.begin(), c.end());
 	}
 
+	if (best_contour.size() < 5)
+	{
+		// fitEllipse crashes for < 5 points
+		result->confidence = 0.0;
+		result->raw_edges = std::move(raw_edges);
+		return result;
+	}
+
 	auto cv_ellipse = cv::fitEllipse(best_contour);
 	//final fitting on resolved contour
 	auto final_fitting = [&](std::vector<std::vector<cv::Point>>& contours, cv::Mat & edges) -> std::vector<cv::Point> {
@@ -551,6 +572,13 @@ std::shared_ptr<Detector2DResult> Detector2D::detect(Detector2DProperties& props
 
 	};
 	std::vector<cv::Point> final_edges = final_fitting(best_contours, edges);
+	if (final_edges.size() < 5)
+	{
+		// fitEllipse crashes for < 5 points
+		result->confidence = 0.0;
+		result->raw_edges = std::move(raw_edges);
+		return result;
+	}
 	auto cv_new_Ellipse = cv::fitEllipse(final_edges);
 	double size_difference  = std::abs(1.0 - cv_ellipse.size.height / cv_new_Ellipse.size.height);
 	auto& cv_final_Ellipse = cv_ellipse;
