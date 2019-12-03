@@ -6,18 +6,24 @@ This is a python-package containing standalone pupil detectors for the [Pupil-La
 - Detector3D
 
 <!--
-## Installation (wheels)
+## Installation
 
-This package has a couple of non-python dependencies that you will have to install yourself.
-Since the setup is very complex on **Windows**, we provide prebuilt-wheels, containing prebuilt versions of all dependencies already.
+### macOS and Linux
+This package has a couple of non-python dependencies that you will have to install yourself before you can install **pupil-detectors**. We are working on clean setup instructions, but until then you can just install all dependencies from the Pupil software stack. You can find installation guides [on the Pupil GitHub page (section: Installing Dependencies)](https://github.com/pupil-labs/pupil#installing-dependencies).
 
-For **maxOS** and **Linux**, you will have to make sure those are installed. Until we have a clear description on how to install the necessary requirements for every platform, we assume you are using **pupil-detectors** in the context of the Pupil-Labs software stack. In this case you should have all necessary dependencies set up already. You can find the dependencies for Pupil on [the Pupil GitHub page](https://github.com/pupil-labs/pupil#installing-dependencies). Not all of them are necessary for **pupil-detectors** and we are working on specific install instructions only for this package.
-
-When you have all nessecary dependencies, you can install **pupil-detectors** with
+Then you can install **pupil-detectors** with pip:
 ```bash
 pip install pupil-detectors
 ```
+
+### Windows
+Since the dependency setup is very complex on Windows, we provide prebuilt-wheels. This means you don't have to install any dependencies and can just install **pupil-detectors**:
+```bash
+pip install pupil-detectors
+```
+If you don't want to use our prebuilt versions, see the section **Building from Source** further below.
 -->
+
 
 ## Installation
 
@@ -62,9 +68,11 @@ cv2.waitKey(0)
 
 ## Developers
 
-### Build from Source
+### Building from Source
 
 You can install this package locally from source. Make sure you have all necessary dependencies setup (see Installation section above). 
+
+**NOTE:** For Windows the dependency setup is quite complex. Until we have clean instructions, please follow the guide for [setting up Windows dependencies for Pupil](https://github.com/pupil-labs/pupil/blob/master/docs/dependencies-windows.md).
 
 **NOTE:** When building the package on your own, you can experience severe performance differences when not having setup your dependencies correctly. Make sure to compare performance to prebuilt wheels or to bundled versions of [Pupil](https://github.com/pupil-labs/pupil).
 
