@@ -10,7 +10,6 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 import typing as T
-import cv2
 import numpy as np
 from cython.operator cimport dereference as deref
 from numpy.math cimport PI

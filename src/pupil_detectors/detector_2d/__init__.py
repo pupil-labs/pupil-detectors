@@ -9,7 +9,5 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-from .utils import Roi
-from .detector_base import DetectorBase
-from .detector_2d import Detector2D
-from .detector_3d import Detector3D
+# rename from python side, since Detector2D is already defined in cython from c++
+from .detector_2d import Detector2DCore as Detector2D

@@ -11,7 +11,6 @@ See COPYING and COPYING.LESSER for license details.
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/videoio.hpp>
 #include <iostream>
 
 #include "common/types.h"
