@@ -84,23 +84,28 @@ pytest tests
 This project does not currently support automated distribution.
 Steps for a new release:
 1. Make sure the code works.
-2. Run bumpversion (major/minor/patch). This will bump the version, create a new commit and a new tag! Git must be clean of modifications.
+2. Install dependencies
 ```
-bumpversion minor
+pip install bump2version twine
 ```
 
-3. Push the new commit and (all) tags.
+3. Run bump2version (major/minor/patch). This will bump the version, create a new commit and a new tag! Git must be clean of modifications.
+```
+bump2version minor
+```
+
+4. Push the new commit and (all) tags.
 ```
 git push --tags
 ```
 
-4. Build the source distribution and upload to PyPI.
+5. Build the source distribution and upload to PyPI.
 ```
 python setup.py sdist
 twine upload ./dist/*
 ```
 
-5. Build wheels and upload to PyPi. Use the internal bundle-machines for Pupil for the correct dependency setup!
+6. Build wheels and upload to PyPi. Use the internal bundle-machines for Pupil for the correct dependency setup!
 ```
 pip wheel --no-deps . -w dist
 twine upload ./dist/*
