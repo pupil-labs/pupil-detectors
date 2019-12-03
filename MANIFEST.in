@@ -10,3 +10,6 @@ graft src/singleeyefitter
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
+
+# exclude package data (only for wheels, not sdist)
+recursive-exclude src/pupil_detectors/.package_data *
