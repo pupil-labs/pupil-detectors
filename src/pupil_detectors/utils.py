@@ -33,7 +33,7 @@ class Roi:
 
     @property
     def rect(self) -> T.Tuple[int, int, int, int]:
-        return self.x_min, self.x_max, self.width, self.height
+        return self.x_min, self.y_min, self.width, self.height
 
     @staticmethod
     def from_slices(x_slice: slice, y_slice: slice) -> "Roi":
