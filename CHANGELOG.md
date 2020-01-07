@@ -1,6 +1,6 @@
 # Changelog
 
-## Upcoming
+## 1.0.3 (2020-01-07)
 ### Fixed
 - Wrong Roi.rect() computation.
 
