@@ -1,5 +1,7 @@
 # pupil-detectors
 
+[![PyPI](https://img.shields.io/pypi/v/pupil-detectors)](https://pypi.org/project/pupil-detectors/)
+
 This is a python-package containing standalone pupil detectors for the [Pupil-Labs](https://pupil-labs.com/) software stack. It contains the following detectors:
 
 - Detector2D
