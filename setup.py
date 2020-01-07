@@ -235,8 +235,13 @@ extensions = [
 ########################################################################################
 # Setup Script
 
-with open("README.md") as readme_file:
-    readme = readme_file.read()
+with open("README.md") as f:
+    readme = f.read()
+
+with open("CHANGELOG.md") as f:
+    changelog = f.read()
+
+long_description = f"{readme}\n\n{changelog}"
 
 if __name__ == "__main__":
     with collect_external_package_data(external_package_data) as package_data:
@@ -258,7 +263,7 @@ if __name__ == "__main__":
             ext_modules=cythonize(extensions, quiet=True, nthreads=8),
             install_requires=install_requires,
             license="GNU",
-            long_description=readme,
+            long_description=long_description,
             long_description_content_type="text/markdown",
             name="pupil-detectors",
             packages=find_packages(package_dir),
