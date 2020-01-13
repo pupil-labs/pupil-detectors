@@ -91,24 +91,38 @@ Steps for a new release:
 pip install bump2version twine
 ```
 
-3. Run bump2version (major/minor/patch). This will bump the version, create a new commit and a new tag! Git must be clean of modifications.
-```
-bump2version minor
-```
+3. Create new tag with bump2version.
+    - Decide on type of version bump: major/minor/patch
+    - Make sure the working directory is clean! (`git status`)
+    - Modify `CHANGELOG.md` to include newest version notes.
+    - Stage changelog (don't commit):
+    
+        ```git add CHANGELOG.md```
+    - Run the appropriate bump2version. This will create a new commit with all necessary changes (including the staged changelog) and a new tag!
+
+        ```bash
+        # ONLY ONE OF THOSE!
+        bump2version major --allow-dirty
+        # or
+        bump2version minor --allow-dirty
+        # or
+        bump2version patch --allow-dirty
+        ```
 
 4. Push the new commit and (all) tags.
 ```
 git push --tags
 ```
 
-5. Build the source distribution and upload to PyPI.
+5. Build the source distribution and wheel (Windows). Use the internal bundle-machine for Pupil for the correct dependency setup!
 ```
 python setup.py sdist
-twine upload ./dist/*
+pip wheel --no-deps . -w dist
 ```
 
-6. Build wheels and upload to PyPi. Use the internal bundle-machines for Pupil for the correct dependency setup!
+6. Test installing from wheel and from sdist!
+
+7. Upload wheel and sdist to PyPI.
 ```
-pip wheel --no-deps . -w dist
 twine upload ./dist/*
 ```
