@@ -1,5 +1,10 @@
+# include setup files
 include setup.py
 include pyproject.toml
+include README.md
+include CHANGELOG.md
+include COPYING
+include COPYING.LESSER
 
 # include all cython files as well as the 2D detector hpp
 recursive-include src/pupil_detectors *.pxd *.pyx *.hpp
