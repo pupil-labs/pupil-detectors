@@ -660,7 +660,8 @@ void EyeModel::initialiseSingleObservation( const Sphere& sphere, Pupil& pupil) 
         auto pupil_radius_at_1 = pupil.mCircle.radius / pupil.mCircle.center.z();
         auto new_pupil_radius = pupil_radius_at_1 * new_pupil_center.z();
         // Parametrise this new pupil position using spherical coordinates
-        Vector3 center_to_pupil = new_pupil_center - sphere.center;
+        // Vector3 center_to_pupil = new_pupil_center - sphere.center;
+        Vector3 center_to_pupil = circle.normal;
         double r = center_to_pupil.norm();
         pupil.mParams.theta = acos(center_to_pupil[1] / r);
         pupil.mParams.psi = atan2(center_to_pupil[2], center_to_pupil[0]);
@@ -699,7 +700,8 @@ Circle EyeModel::getIntersectedCircle( const Sphere& sphere, const Circle& circl
         auto pupil_radius_at_1 = circle.radius / circle.center.z();
         auto new_pupil_radius = pupil_radius_at_1 * new_pupil_center.z();
         // Parametrise this new pupil position using spherical coordinates
-        Vector3 center_to_pupil = new_pupil_center - sphere.center;
+        // Vector3 center_to_pupil = new_pupil_center - sphere.center;
+        Vector3 center_to_pupil = circle.normal;
         double r = center_to_pupil.norm();
         double theta = acos(center_to_pupil[1] / r);
         double psi = atan2(center_to_pupil[2], center_to_pupil[0]);
