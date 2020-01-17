@@ -114,7 +114,7 @@ Detector3DResult EyeModelFitter::updateAndDetect(std::shared_ptr<Detector2DResul
     auto observation3DPtr = std::make_shared<const Observation>(observation2D, mFocalLength);
     bool do3DSearch = false;
     // 2d observation good enough to show to models?
-    if (observation2D->confidence >= 0.7) {
+    if (observation2D->confidence >= 0.6) {
 
         // allow each model to decide by themself if the new observation supports the model or not
         auto circleAndFit = mActiveModelPtr->presentObservation(observation3DPtr, mAverageFramerate.getAverage(), model_is_frozen);
@@ -137,7 +137,7 @@ Detector3DResult EyeModelFitter::updateAndDetect(std::shared_ptr<Detector2DResul
             // }
         }
         else {
-            do3DSearch = true;
+            do3DSearch = false;
         }
 
         for (auto& modelPtr : mAlternativeModelsPtrs) {
@@ -146,7 +146,7 @@ Detector3DResult EyeModelFitter::updateAndDetect(std::shared_ptr<Detector2DResul
 
     }
     else {
-        do3DSearch = true;
+        do3DSearch = false;
     }
 
     if (do3DSearch  && mCurrentSphere != Sphere::Null) { // if it's too weak we try to find a better one in 3D
