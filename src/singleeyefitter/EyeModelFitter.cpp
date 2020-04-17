@@ -62,6 +62,12 @@ EyeModelFitter::EyeModelFitter(double focalLength, Vector3 cameraCenter) :
 
 }
 
+Detector3DResult EyeModelFitter::updateAndDetectFromBinary(const std::string& binary, double timestamp, const Detector3DProperties& props , bool debug)
+{
+    auto observation2D = std::make_shared<Detector2DResult>(binary);
+    observation2D->timestamp = timestamp;
+    return updateAndDetect(observation2D, props, debug);
+}
 
 Detector3DResult EyeModelFitter::updateAndDetect(std::shared_ptr<Detector2DResult>& observation2D , const Detector3DProperties& props , bool debug)
 {

@@ -14,6 +14,7 @@ from libcpp.memory cimport shared_ptr
 from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 from libc.stdint cimport int32_t
+from libcpp.string cimport string
 
 
 cdef extern from '<opencv2/core.hpp>':
@@ -96,6 +97,7 @@ cdef extern from 'common/types.h':
         double timestamp
         int image_width
         int image_height
+        string serialize()
 
     cdef struct ModelDebugProperties:
         Sphere[double] sphere
@@ -172,6 +174,7 @@ cdef extern from "singleeyefitter/EyeModelFitter.h" namespace "singleeyefitter":
         EyeModelFitter(double focalLength )
 
         Detector3DResult updateAndDetect( shared_ptr[Detector2DResult]& results, const Detector3DProperties& prop, bint fillDebugResult )
+        Detector3DResult updateAndDetectFromBinary(const string&, double, const Detector3DProperties& prop, bint fillDebugResult )
 
         void reset()
         double getFocalLength()

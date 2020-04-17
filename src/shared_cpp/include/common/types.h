@@ -10,6 +10,8 @@
 #include <vector>
 #include <memory>
 #include <chrono>
+#include <string>
+#include <sstream>
 
 #include <opencv2/core.hpp>
 
@@ -66,7 +68,91 @@ namespace singleeyefitter {
         double timestamp = 0.0;
         int image_width = 0;
         int image_height = 0;
+        
+        Detector2DResult() = default;
 
+        public:
+        std::string serialize()
+        {
+            std::stringstream ss;
+        
+            ss.write((const char*)&confidence, sizeof(double));
+
+            ss.write((const char*)&timestamp, sizeof(double));
+
+            ss.write((const char*)&image_width, sizeof(int));
+
+            ss.write((const char*)&image_height, sizeof(int));
+
+            ss.write((const char*)&ellipse.center[0], sizeof(double));
+            ss.write((const char*)&ellipse.center[1], sizeof(double));
+            ss.write((const char*)&ellipse.major_radius, sizeof(double));
+            ss.write((const char*)&ellipse.minor_radius, sizeof(double));
+            ss.write((const char*)&ellipse.angle, sizeof(double));
+
+            ss.write((const char*)&current_roi.x, sizeof(int));
+            ss.write((const char*)&current_roi.y, sizeof(int));
+            ss.write((const char*)&current_roi.width, sizeof(int));
+            ss.write((const char*)&current_roi.height, sizeof(int));
+
+            size_t size = final_edges.size();
+            ss.write((const char*)&size, sizeof(size_t));
+            for (const auto& p : final_edges)
+            {
+                ss.write((const char*)&p.x, sizeof(int));
+                ss.write((const char*)&p.y, sizeof(int));
+            }
+
+            size = raw_edges.size();
+            ss.write((const char*)&size, sizeof(size_t));
+            for (const auto& p : raw_edges)
+            {
+                ss.write((const char*)&p.x, sizeof(int));
+                ss.write((const char*)&p.y, sizeof(int));
+            }
+            return ss.str();
+        }
+
+        Detector2DResult(const std::string& bytes)
+        {
+            std::stringstream ss(bytes);
+
+            ss.read((char*)&confidence, sizeof(double));
+
+            ss.read((char*)&timestamp, sizeof(double));
+
+            ss.read((char*)&image_width, sizeof(int));
+
+            ss.read((char*)&image_height, sizeof(int));
+
+            ss.read((char*)&ellipse.center[0], sizeof(double));
+            ss.read((char*)&ellipse.center[1], sizeof(double));
+            ss.read((char*)&ellipse.major_radius, sizeof(double));
+            ss.read((char*)&ellipse.minor_radius, sizeof(double));
+            ss.read((char*)&ellipse.angle, sizeof(double));
+
+            ss.read((char*)&current_roi.x, sizeof(int));
+            ss.read((char*)&current_roi.y, sizeof(int));
+            ss.read((char*)&current_roi.width, sizeof(int));
+            ss.read((char*)&current_roi.height, sizeof(int));
+
+            size_t size;
+            ss.read((char*)&size, sizeof(size_t));
+            final_edges.resize(size);
+            for (auto& p : final_edges)
+            {
+                ss.read((char*)&p.x, sizeof(int));
+                ss.read((char*)&p.y, sizeof(int));
+            }
+
+            ss.read((char*)&size, sizeof(size_t));
+            raw_edges.resize(size);
+            for (auto& p : raw_edges)
+            {
+                ss.read((char*)&p.x, sizeof(int));
+                ss.read((char*)&p.y, sizeof(int));
+            }
+        }
     };
 
     struct ModelDebugProperties{

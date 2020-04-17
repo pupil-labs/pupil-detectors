@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 #include <Eigen/Core>
 
 #include "common/types.h"
@@ -34,7 +35,7 @@ namespace singleeyefitter {
             // this is called with new observations from the 2D detector
             // it decides what happens ,since not all observations are added
             Detector3DResult updateAndDetect( std::shared_ptr<Detector2DResult>& observation,const Detector3DProperties& props, bool debug = false );
-
+            Detector3DResult updateAndDetectFromBinary(const std::string& binary, double timestamp, const Detector3DProperties& props, bool debug = false );
 
         private:
 
