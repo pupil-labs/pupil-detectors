@@ -10,6 +10,8 @@
 #include <vector>
 #include <memory>
 #include <chrono>
+#include <string>
+#include <sstream>
 
 #include <opencv2/core.hpp>
 
@@ -66,7 +68,91 @@ namespace singleeyefitter {
         double timestamp = 0.0;
         int image_width = 0;
         int image_height = 0;
+        
+        Detector2DResult() = default;
 
+        public:
+        std::string serialize()
+        {
+            std::stringstream ss;
+        
+            ss.write(reinterpret_cast<const char*>(&confidence), sizeof(double));
+
+            ss.write(reinterpret_cast<const char*>(&timestamp), sizeof(double));
+
+            ss.write(reinterpret_cast<const char*>(&image_width), sizeof(int));
+
+            ss.write(reinterpret_cast<const char*>(&image_height), sizeof(int));
+
+            ss.write(reinterpret_cast<const char*>(&ellipse.center[0]), sizeof(double));
+            ss.write(reinterpret_cast<const char*>(&ellipse.center[1]), sizeof(double));
+            ss.write(reinterpret_cast<const char*>(&ellipse.major_radius), sizeof(double));
+            ss.write(reinterpret_cast<const char*>(&ellipse.minor_radius), sizeof(double));
+            ss.write(reinterpret_cast<const char*>(&ellipse.angle), sizeof(double));
+
+            ss.write(reinterpret_cast<const char*>(&current_roi.x), sizeof(int));
+            ss.write(reinterpret_cast<const char*>(&current_roi.y), sizeof(int));
+            ss.write(reinterpret_cast<const char*>(&current_roi.width), sizeof(int));
+            ss.write(reinterpret_cast<const char*>(&current_roi.height), sizeof(int));
+
+            size_t size = final_edges.size();
+            ss.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
+            for (const auto& p : final_edges)
+            {
+                ss.write(reinterpret_cast<const char*>(&p.x), sizeof(int));
+                ss.write(reinterpret_cast<const char*>(&p.y), sizeof(int));
+            }
+
+            size = raw_edges.size();
+            ss.write(reinterpret_cast<const char*>(&size), sizeof(size_t));
+            for (const auto& p : raw_edges)
+            {
+                ss.write(reinterpret_cast<const char*>(&p.x), sizeof(int));
+                ss.write(reinterpret_cast<const char*>(&p.y), sizeof(int));
+            }
+            return ss.str();
+        }
+
+        Detector2DResult(const std::string& bytes)
+        {
+            std::stringstream ss(bytes);
+
+            ss.read(reinterpret_cast<char*>(&confidence), sizeof(double));
+
+            ss.read(reinterpret_cast<char*>(&timestamp), sizeof(double));
+
+            ss.read(reinterpret_cast<char*>(&image_width), sizeof(int));
+
+            ss.read(reinterpret_cast<char*>(&image_height), sizeof(int));
+
+            ss.read(reinterpret_cast<char*>(&ellipse.center[0]), sizeof(double));
+            ss.read(reinterpret_cast<char*>(&ellipse.center[1]), sizeof(double));
+            ss.read(reinterpret_cast<char*>(&ellipse.major_radius), sizeof(double));
+            ss.read(reinterpret_cast<char*>(&ellipse.minor_radius), sizeof(double));
+            ss.read(reinterpret_cast<char*>(&ellipse.angle), sizeof(double));
+
+            ss.read(reinterpret_cast<char*>(&current_roi.x), sizeof(int));
+            ss.read(reinterpret_cast<char*>(&current_roi.y), sizeof(int));
+            ss.read(reinterpret_cast<char*>(&current_roi.width), sizeof(int));
+            ss.read(reinterpret_cast<char*>(&current_roi.height), sizeof(int));
+
+            size_t size;
+            ss.read(reinterpret_cast<char*>(&size), sizeof(size_t));
+            final_edges.resize(size);
+            for (auto& p : final_edges)
+            {
+                ss.read(reinterpret_cast<char*>(&p.x), sizeof(int));
+                ss.read(reinterpret_cast<char*>(&p.y), sizeof(int));
+            }
+
+            ss.read(reinterpret_cast<char*>(&size), sizeof(size_t));
+            raw_edges.resize(size);
+            for (auto& p : raw_edges)
+            {
+                ss.read(reinterpret_cast<char*>(&p.x), sizeof(int));
+                ss.read(reinterpret_cast<char*>(&p.y), sizeof(int));
+            }
+        }
     };
 
     struct ModelDebugProperties{

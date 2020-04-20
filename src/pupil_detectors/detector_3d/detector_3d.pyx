@@ -13,6 +13,7 @@ import typing as T
 import numpy as np
 from cython.operator cimport dereference as deref
 from numpy.math cimport PI
+from libcpp.string cimport string
 
 from ..c_types_wrapper cimport (
     Detector3DResult,
@@ -126,15 +127,18 @@ cdef class Detector3DCore(TemporalDetectorBase):
         color_img: T.Optional[np.ndarray]=None,
         roi: T.Optional[Roi]=None,
         debug=False,
+        internal_raw_2d_data: bytes=None,
         **kwargs
     ) -> T.Dict[str, T.Any]:
         
-        cpp2DResultPtr = self.detector2D.c_detect(gray_img, color_img, roi)
+        if internal_raw_2d_data is None:
+            cpp2DResultPtr = self.detector2D.c_detect(gray_img, color_img, roi)
+            # timestamp doesn't get set elsewhere and it is needed in detector3D
+            deref(cpp2DResultPtr).timestamp = timestamp
+            cpp3DResult  = self.detector3DPtr.updateAndDetect(cpp2DResultPtr, self.properties, debug)
 
-        # timestamp doesn't get set elsewhere and it is needed in detector3D
-        deref(cpp2DResultPtr).timestamp = timestamp
-
-        cpp3DResult  = self.detector3DPtr.updateAndDetect(cpp2DResultPtr, self.properties, debug)
+        else:
+            cpp3DResult  = self.detector3DPtr.updateAndDetectFromBinary(internal_raw_2d_data, timestamp, self.properties, debug)
 
         height, width = gray_img.shape
         pyResult = result3D_to_dict(cpp3DResult, timestamp, width, height)

@@ -117,7 +117,9 @@ cdef class Detector2DCore(DetectorBase):
         cppResultPtr = self.c_detect(gray_img, color_img, roi)
         result = deref(cppResultPtr)
 
-        return result2D_to_dict(result)
+        result_dict = result2D_to_dict(result)
+        result_dict["internal_2d_raw_data"] = result.serialize()
+        return result_dict
 
 
     cdef shared_ptr[Detector2DResult] c_detect(
