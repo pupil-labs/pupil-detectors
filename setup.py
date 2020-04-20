@@ -270,6 +270,6 @@ if __name__ == "__main__":
             package_data={package: package_data},
             package_dir={"": package_dir},
             url="https://github.com/pupil-labs/pupil-detectors",
-            version="1.0.4",
+            version="1.0.5",
             zip_save=False,
         )
