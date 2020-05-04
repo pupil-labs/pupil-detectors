@@ -53,20 +53,6 @@ cdef class Detector3DCore(TemporalDetectorBase):
 
     def __init__(self, properties=None):
         self.detector2D = Detector2DCore(properties)
-        if properties is None:
-            # Overwrite default 2D detector properties
-            overwrite_2d = {
-                "2d": {
-                    "strong_perimeter_ratio_range_min": 0.8,
-                    "strong_area_ratio_range_min": 0.6,
-                    "ellipse_roundness_ratio": 0.1,
-                    "initial_ellipse_fit_treshhold": 1.8,
-                    "final_perimeter_ratio_range_min": 0.6,
-                    "final_perimeter_ratio_range_max": 1.2,
-                    "ellipse_true_support_min_dist": 2.5,
-                }
-            }
-            self.detector2D.update_properties(overwrite_2d)
 
         # initialize with defaults first and then set_properties to use type checking
         self.properties = self.get_default_properties()
