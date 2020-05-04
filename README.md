@@ -111,6 +111,7 @@ pip install bump2version twine
 
 4. Push the new commit and (all) tags.
 ```
+git push
 git push --tags
 ```
 
