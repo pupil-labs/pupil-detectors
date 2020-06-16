@@ -116,11 +116,13 @@ else:
         "/usr/local/opt/opencv/include",  # old opencv brew (v3)
         "/usr/local/opt/opencv@3/include",  # new opencv@3 brew
         "/usr/local/include/opencv4",  # new opencv brew (v4)
+        "/usr/include/opencv4",  # opencv (v4) on ubuntu 20.04
     ]
     opencv_library_dirs = [
         "/usr/local/opt/opencv/lib",  # old opencv brew (v3)
         "/usr/local/opt/opencv@3/lib",  # new opencv@3 brew
         "/usr/local/lib",  # new opencv brew (v4)
+        "/usr/lib",  # opencv (v4) on ubuntu 20.04
     ]
     opencv_libraries = [
         "opencv_core",
