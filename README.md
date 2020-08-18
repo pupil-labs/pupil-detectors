@@ -63,6 +63,8 @@ cv2.waitKey(0)
 
 You can install this package locally from source. Make sure you have all necessary dependencies setup (see Installation section above). 
 
+**NOTE:** When using a Python virtual environment, it should be created without the `--system-site-packages` flag; otherwise building might fail.
+
 **NOTE:** For Windows the dependency setup is quite complex. Until we have clean instructions, please follow the guide for [setting up Windows dependencies for Pupil](https://github.com/pupil-labs/pupil/blob/master/docs/dependencies-windows.md).
 
 **NOTE:** When building the package on your own, you can experience severe performance differences when not having setup your dependencies correctly. Make sure to compare performance to prebuilt wheels or to bundled versions of [Pupil](https://github.com/pupil-labs/pupil).
