@@ -44,14 +44,13 @@ cdef class Detector3DCore(TemporalDetectorBase):
     cdef Detector2DCore detector2D
     cdef EyeModelFitter *detector3DPtr
 
-    def __cinit__(self, *args, **kwargs):
-        focal_length = 620.
+    def __cinit__(self, *args, focal_length=620.0, **kwargs):
         self.detector3DPtr = new EyeModelFitter(focal_length)
         
     def __dealloc__(self):
         del self.detector3DPtr
 
-    def __init__(self, properties=None):
+    def __init__(self, properties=None, *args, **kwargs):
         self.detector2D = Detector2DCore(properties)
 
         # initialize with defaults first and then set_properties to use type checking
