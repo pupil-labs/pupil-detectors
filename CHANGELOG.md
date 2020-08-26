@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1 (2020-08-26)
+### Improvements
+- Added default lookup paths for OpenCV on Ubuntu 20.04, enabling building from source out of the box there. 
+- Added parameter to specify the focal length of the camera supplying the eye images for a more accurate 3D model.
+
 ## 1.1.0 (2020-05-04)
 ### Changed
 - Changed the default 2D detector properties to be the same as the default overrides that the 3D detector applies.
