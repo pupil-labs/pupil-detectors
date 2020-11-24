@@ -25,4 +25,3 @@ if platform.system() == "Windows":
 from .utils import Roi
 from .detector_base import DetectorBase
 from .detector_2d import Detector2D
-from .detector_3d import Detector3D

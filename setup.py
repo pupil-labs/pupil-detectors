@@ -217,22 +217,6 @@ extensions = [
         library_dirs=library_dirs,
         extra_compile_args=extra_compile_args,
     ),
-    Extension(
-        name="pupil_detectors.detector_3d.detector_3d",
-        sources=[
-            f"{package_dir}/pupil_detectors/detector_3d/detector_3d.pyx",
-            f"{package_dir}/singleeyefitter/ImageProcessing/cvx.cpp",
-            f"{package_dir}/singleeyefitter/utils.cpp",
-            f"{package_dir}/singleeyefitter/detectorUtils.cpp",
-            f"{package_dir}/singleeyefitter/EyeModelFitter.cpp",
-            f"{package_dir}/singleeyefitter/EyeModel.cpp",
-        ],
-        language="c++",
-        include_dirs=include_dirs,
-        libraries=libraries,
-        library_dirs=library_dirs,
-        extra_compile_args=extra_compile_args,
-    ),
 ]
 ########################################################################################
 # Setup Script
