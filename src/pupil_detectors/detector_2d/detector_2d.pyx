@@ -118,7 +118,6 @@ cdef class Detector2DCore(DetectorBase):
         result = deref(cppResultPtr)
 
         result_dict = result2D_to_dict(result)
-        result_dict["internal_2d_raw_data"] = result.serialize()
         return result_dict
 
 

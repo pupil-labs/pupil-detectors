@@ -66,7 +66,6 @@ cdef extern from 'common/types.h':
         double timestamp
         int image_width
         int image_height
-        string serialize()
 
     cdef struct Detector2DProperties:
         int intensity_range
