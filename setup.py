@@ -100,14 +100,6 @@ if platform.system() == "Windows":
 
     EIGEN = "C:\\work\\ceres-windows\\Eigen"
     include_dirs.append(f"{EIGEN}")
-
-    CERES = "C:\\work\\ceres-windows"
-    # NOTE: ceres for windows needs to link against glog
-    include_dirs.append(f"{CERES}")
-    include_dirs.append(f"{CERES}\\ceres-solver\\include")
-    include_dirs.append(f"{CERES}\\glog\\src\\windows")
-    library_dirs.append(f"{CERES}\\x64\\Release")
-    libraries.append("ceres_static")
     libraries.append("libglog_static")
 
 else:
@@ -156,9 +148,6 @@ else:
         "/usr/local/include/eigen3",
         "/usr/include/eigen3",
     ]
-
-    # Ceres
-    libraries.append("ceres")
 
 ########################################################################################
 # Setup Compile Args
