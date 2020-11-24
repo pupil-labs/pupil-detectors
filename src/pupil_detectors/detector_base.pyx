@@ -13,18 +13,18 @@ import typing as T
 
 import numpy as np
 
-NamespacedProperties = T.Dict[str, T.Dict[str, T.Any]]
+DetectorProperties = T.Dict[str, T.Any]
 
 cdef class DetectorBase:
     """Base interface for pupil detectors."""
 
     # abstract interface
 
-    def __init__(self, properties:T.Optional[NamespacedProperties]=None):
+    def __init__(self, properties:T.Optional[DetectorProperties]=None):
         """Construct a new detector.
         
         Parameters:
-            properties (optional): dicts of properties, grouped by namespaces
+            properties (optional): dict of property names and values
         """
         raise NotImplementedError()
 
@@ -42,16 +42,12 @@ cdef class DetectorBase:
             More keys can be added for custom functionality when subclassing.
         """
         raise NotImplementedError()
-    
-    def get_property_namespaces(self) -> T.Iterable[str]:
-        """Returns a list of property namespaces that the detector supports."""
-        raise NotImplementedError()
 
-    def get_properties(self) -> NamespacedProperties:
+    def get_properties(self) -> DetectorProperties:
         """Returns a copy of the properties and values of the detector."""
         raise NotImplementedError()
 
-    def update_properties(self, properties: NamespacedProperties) -> None:
+    def update_properties(self, properties: DetectorProperties) -> None:
         """Update existing properties of the detector."""
         raise NotImplementedError()
 

@@ -71,16 +71,12 @@ cdef class Detector2DCore(DetectorBase):
         }
 
     # Base interface
-    
-    def get_property_namespaces(self) -> T.Iterable[str]:
-        return ["2d"]
 
     def get_properties(self):
-        return {"2d": self.properties.copy()}
+        return self.properties.copy()
 
     def update_properties(self, properties):
-        relevant_properties = properties.get("2d", {})
-        for key, value in relevant_properties.items():
+        for key, value in properties.items():
             if key not in self.properties:
                 continue
             expected_type = type(self.properties[key])
@@ -88,7 +84,7 @@ cdef class Detector2DCore(DetectorBase):
                 self.properties[key] = expected_type(value)
             except ValueError as e:
                 raise ValueError(
-                    f"Value `{repr(value)}` for property `2d.{key}`"
+                    f"Value `{repr(value)}` for key `{key}`"
                     f" could not be converted to expected type: {expected_type}"
                 ) from e
 
