@@ -22,6 +22,6 @@ if platform.system() == "Windows":
     os.environ["PATH"] = str(data_path.resolve()) + os.pathsep + os.environ["PATH"]
 
 
-from .utils import Roi
+from .roi import Roi
 from .detector_base import DetectorBase
 from .detector_2d import Detector2D

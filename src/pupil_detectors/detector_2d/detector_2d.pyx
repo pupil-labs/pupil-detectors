@@ -27,7 +27,7 @@ from ..c_types_wrapper cimport (
     Rect_,
 )
 from ..detector_base cimport DetectorBase
-from ..utils import Roi
+from ..roi import Roi
 
 
 cdef class Detector2DCore(DetectorBase):
