@@ -100,7 +100,6 @@ if platform.system() == "Windows":
 
     EIGEN = "C:\\work\\ceres-windows\\Eigen"
     include_dirs.append(f"{EIGEN}")
-    libraries.append("libglog_static")
 
 else:
     # Opencv
