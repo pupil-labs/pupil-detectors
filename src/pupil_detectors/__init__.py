@@ -9,7 +9,7 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-__version__ = "1.1.1"
+__version__ = "2.0.0"
 
 import platform
 
