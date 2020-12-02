@@ -54,4 +54,3 @@ class Roi:
     @staticmethod
     def from_shape(shape: T.Tuple[int, int]) -> "Roi":
         return Roi.from_rect(x=0, y=0, width=shape[1], height=shape[0])
-

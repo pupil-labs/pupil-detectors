@@ -9,7 +9,7 @@ See COPYING and COPYING.LESSER for license details.
 ---------------------------------------------------------------------------~(*)
 """
 
-__version__ = "1.1.1"
+__version__ = "2.0.0"
 
 import platform
 
@@ -22,7 +22,6 @@ if platform.system() == "Windows":
     os.environ["PATH"] = str(data_path.resolve()) + os.pathsep + os.environ["PATH"]
 
 
-from .utils import Roi
+from .roi import Roi
 from .detector_base import DetectorBase
 from .detector_2d import Detector2D
-from .detector_3d import Detector3D

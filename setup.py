@@ -101,15 +101,6 @@ if platform.system() == "Windows":
     EIGEN = "C:\\work\\ceres-windows\\Eigen"
     include_dirs.append(f"{EIGEN}")
 
-    CERES = "C:\\work\\ceres-windows"
-    # NOTE: ceres for windows needs to link against glog
-    include_dirs.append(f"{CERES}")
-    include_dirs.append(f"{CERES}\\ceres-solver\\include")
-    include_dirs.append(f"{CERES}\\glog\\src\\windows")
-    library_dirs.append(f"{CERES}\\x64\\Release")
-    libraries.append("ceres_static")
-    libraries.append("libglog_static")
-
 else:
     # Opencv
     opencv_include_dirs = [
@@ -156,9 +147,6 @@ else:
         "/usr/local/include/eigen3",
         "/usr/include/eigen3",
     ]
-
-    # Ceres
-    libraries.append("ceres")
 
 ########################################################################################
 # Setup Compile Args
@@ -217,22 +205,6 @@ extensions = [
         library_dirs=library_dirs,
         extra_compile_args=extra_compile_args,
     ),
-    Extension(
-        name="pupil_detectors.detector_3d.detector_3d",
-        sources=[
-            f"{package_dir}/pupil_detectors/detector_3d/detector_3d.pyx",
-            f"{package_dir}/singleeyefitter/ImageProcessing/cvx.cpp",
-            f"{package_dir}/singleeyefitter/utils.cpp",
-            f"{package_dir}/singleeyefitter/detectorUtils.cpp",
-            f"{package_dir}/singleeyefitter/EyeModelFitter.cpp",
-            f"{package_dir}/singleeyefitter/EyeModel.cpp",
-        ],
-        language="c++",
-        include_dirs=include_dirs,
-        libraries=libraries,
-        library_dirs=library_dirs,
-        extra_compile_args=extra_compile_args,
-    ),
 ]
 ########################################################################################
 # Setup Script
@@ -272,6 +244,6 @@ if __name__ == "__main__":
             package_data={package: package_data},
             package_dir={"": package_dir},
             url="https://github.com/pupil-labs/pupil-detectors",
-            version="1.1.1",
+            version="2.0.0",
             zip_save=False,
         )
