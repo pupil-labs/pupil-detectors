@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.0.0 (2020-12-02)
+### Removed Detector3D - [#17](https://github.com/pupil-labs/pupil-detectors/pull/17)
+In favor of our new [pye3d detector](https://github.com/pupil-labs/pye3d-detector/), we
+have removed the previous `Detector3D` class. This allows us to remove Ceres as a
+dependency and to cleanup the detector class interface.
+
+Specifically, getting and setting properties has been simplified by removing property
+namespaces.
+```diff
+- NamespacedProperties = T.Dict[str, T.Dict[str, T.Any]]
++ DetectorProperties = T.Dict[str, T.Any]
+
+- def get_property_namespaces(self) -> T.Iterable[str]
+
+- def get_properties(self) -> NamespacedProperties:
++ def get_properties(self) -> DetectorProperties:
+
+- def update_properties(self, properties: NamespacedProperties) -> None
++ def update_properties(self, properties: DetectorProperties) -> None
+```
+
+The `Roi` class has been moved from `pupil_detectors.utils` to `pupil_detectors.roi`.
+
 ## 1.1.1 (2020-08-26)
 ### Improvements
 - Added default lookup paths for OpenCV on Ubuntu 20.04, enabling building from source out of the box there. 

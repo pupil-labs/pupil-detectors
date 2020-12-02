@@ -2,10 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/pupil-detectors)](https://pypi.org/project/pupil-detectors/)
 
-This is a python-package containing standalone pupil detectors for the [Pupil-Labs](https://pupil-labs.com/) software stack. It contains the following detectors:
-
-- Detector2D
-- Detector3D
+This Python package contains the standalone 2D pupil detectors for the [Pupil-Labs](https://pupil-labs.com/) software stack.
 
 ## Installation
 
@@ -31,7 +28,7 @@ Here's a quick example on how to detect and draw an ellipse.
 
 ```python
 import cv2
-from pupil_detectors import Detector2D, Detector3D
+from pupil_detectors import Detector2D
 
 detector = Detector2D()
 
