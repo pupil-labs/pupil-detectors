@@ -1,6 +1,7 @@
 #ifndef singleeyefitter_project_h__
 #define singleeyefitter_project_h__
 
+#include <iostream>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include "geometry/Ellipse.h"

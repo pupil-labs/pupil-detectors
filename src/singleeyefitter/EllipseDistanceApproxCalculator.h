@@ -1,8 +1,6 @@
 #ifndef singleeyefitter_ellipsedistanceapproxcalculator_h__
 #define singleeyefitter_ellipsedistanceapproxcalculator_h__
 
-
-#include "common/traits.h"
 #include "mathHelper.h"
 
 // Calculates:
@@ -21,8 +19,6 @@ namespace singleeyefitter {
     template<typename T>
     class EllipseDistCalculator {
         public:
-            typedef typename ad_traits<T>::scalar Const;
-
             EllipseDistCalculator(const Ellipse2D<T>& ellipse) : r(ellipse.major_radius)
             {
                 using std::sin;
@@ -34,46 +30,14 @@ namespace singleeyefitter {
             template<typename U>
             T operator()(U&& x, U&& y)
             {
-                return calculate(std::forward<U>(x), std::forward<U>(y), typename ad_traits<T>::ad_tag(), typename ad_traits<U>::ad_tag());
+                return calculate(std::forward<U>(x), std::forward<U>(y));
             }
 
             template<typename U>
-            T calculate(U&& x, U&& y, scalar_tag, scalar_tag)
+            T calculate(U&& x, U&& y)
             {
                 T rAxt((rA(0, 0) * x + rA(0, 1) * y) - rAt[0]);
                 T rAyt((rA(1, 0) * x + rA(1, 1) * y) - rAt[1]);
-                T xy_dist = norm(rAxt, rAyt);
-                return (r - xy_dist);
-            }
-
-            // Expanded versions for Jet calculations so that Eigen can do some of its expression magic
-            template<typename U>
-            T calculate(U&& x, U&& y, scalar_tag, ceres_jet_tag)
-            {
-                T rAxt(rA(0, 0) * x.a + rA(0, 1) * y.a - rAt[0],
-                       rA(0, 0) * x.v + rA(0, 1) * y.v);
-                T rAyt(rA(1, 0) * x.a + rA(1, 1) * y.a - rAt[1],
-                       rA(1, 0) * x.v + rA(1, 1) * y.v);
-                T xy_dist = norm(rAxt, rAyt);
-                return (r - xy_dist);
-            }
-            template<typename U>
-            T calculate(U&& x, U&& y, ceres_jet_tag, scalar_tag)
-            {
-                T rAxt(rA(0, 0).a * x + rA(0, 1).a * y - rAt[0].a,
-                       rA(0, 0).v * x + rA(0, 1).v * y - rAt[0].v);
-                T rAyt(rA(1, 0).a * x + rA(1, 1).a * y - rAt[1].a,
-                       rA(1, 0).v * x + rA(1, 1).v * y - rAt[1].v);
-                T xy_dist = norm(rAxt, rAyt);
-                return (r - xy_dist);
-            }
-            template<typename U>
-            T calculate(U&& x, U&& y, ceres_jet_tag, ceres_jet_tag)
-            {
-                T rAxt(rA(0, 0).a * x.a + rA(0, 1).a * y.a - rAt[0].a,
-                       rA(0, 0).v * x.a + rA(0, 0).a * x.v + rA(0, 1).v * y.a + rA(0, 1).a * y.v - rAt[0].v);
-                T rAyt(rA(1, 0).a * x.a + rA(1, 1).a * y.a - rAt[1].a,
-                       rA(1, 0).v * x.a + rA(1, 0).a * x.v + rA(1, 1).v * y.a + rA(1, 1).a * y.v - rAt[1].v);
                 T xy_dist = norm(rAxt, rAyt);
                 return (r - xy_dist);
             }

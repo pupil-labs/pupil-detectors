@@ -89,7 +89,7 @@ if platform.system() == "Windows":
     library_dirs.append(f"{OPENCV}\\x64\\vc14\\lib")
     libraries.append(OPENCV_DLL_NAME)
     # We want to ship opencv in windows wheels, so that we don't have any external
-    # dependencies. Ceres is statically compiled and opencv will be supplied.
+    # dependencies.
     opencv_dll = ctypes.util.find_library(OPENCV_DLL_NAME)
     if opencv_dll is None:
         raise FileNotFoundError(
@@ -98,7 +98,7 @@ if platform.system() == "Windows":
         )
     external_package_data.append(opencv_dll)
 
-    EIGEN = "C:\\work\\ceres-windows\\Eigen"
+    EIGEN = "C:\\work\\Eigen"
     include_dirs.append(f"{EIGEN}")
 
 else:
@@ -244,6 +244,6 @@ if __name__ == "__main__":
             package_data={package: package_data},
             package_dir={"": package_dir},
             url="https://github.com/pupil-labs/pupil-detectors",
-            version="2.0.0",
+            version="2.0.1",
             zip_save=False,
         )

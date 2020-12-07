@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 (2020-12-03)
+
+Removed all remaining Ceres references. Eigen3 remains a dependency.
+
 ## 2.0.0 (2020-12-02)
 ### Removed Detector3D - [#17](https://github.com/pupil-labs/pupil-detectors/pull/17)
 In favor of our new [pye3d detector](https://github.com/pupil-labs/pye3d-detector/), we
