@@ -2,6 +2,9 @@
 requires = [
     "setuptools",
     "wheel",
+    "scikit-build",
+    "cmake",
+    "ninja",
     "numpy", # need to link against numpy
     "cython",
 ]
