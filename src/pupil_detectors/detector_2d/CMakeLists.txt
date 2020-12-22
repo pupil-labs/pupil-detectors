@@ -31,16 +31,24 @@ find_package(NumPy REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(OpenCV REQUIRED)
 
-include_directories("cpp/shared/include")
-include_directories("cpp/singleeyefitter")
+include_directories("../cpp/shared/include")
+include_directories("../cpp/singleeyefitter")
+include_directories("../cpp")
+include_directories("..")
+include_directories(".")
 include_directories(${NumPy_INCLUDE_DIRS})
 
-add_cython_target(detector_base CXX PY3)
-add_library(detector_base MODULE ${detector_base})
-python_extension_module(detector_base)
-target_link_libraries(detector_base ${OpenCV_LIBS})
-target_link_libraries(detector_base Eigen3::Eigen)
+add_cython_target(detector_2d
+    "detector_2d.pyx"
+    # "../coarse_pupil.pxd"
+    # "../c_types_wrapper.pxd"
+    "../cpp/singleeyefitter/ImageProcessing/cvx.cpp"
+    "../cpp/singleeyefitter/utils.cpp"
+    "../cpp/singleeyefitter/detectorUtils.cpp"
+    CXX PY3)
+add_library(detector_2d MODULE ${detector_2d})
+python_extension_module(detector_2d)
+target_link_libraries(detector_2d ${OpenCV_LIBS})
+target_link_libraries(detector_2d Eigen3::Eigen)
 
-add_subdirectory(detector_2d)
-
-install(TARGETS detector_base LIBRARY DESTINATION ".")
+install(TARGETS detector_2d LIBRARY DESTINATION "detector_2d")
