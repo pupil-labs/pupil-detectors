@@ -3,6 +3,9 @@
 name: Build dependencies
 
 on:
+  push:
+    # for development purposes, can be removed when merged
+    branches: ["update-to-skbuild"]
   schedule:
     # run every 6 days to keep cache alive
     - cron: "30 7 */6 * *"
