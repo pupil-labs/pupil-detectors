@@ -96,6 +96,6 @@ jobs:
         with:
           name: pupil-detectors-build-log-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
-            ./_skbuild/
-            ./dist/
-            ./raw_wheels/
+            _skbuild
+            dist
+            raw_wheels
