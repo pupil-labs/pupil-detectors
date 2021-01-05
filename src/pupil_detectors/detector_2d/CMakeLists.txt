@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
+cmake_policy(SET CMP0076 NEW)
 
 project("pupil_detectors")
 
@@ -33,20 +34,19 @@ find_package(OpenCV REQUIRED)
 
 include_directories("../cpp/shared/include")
 include_directories("../cpp/singleeyefitter")
+include_directories("../cpp/singleeyefitter/ImageProcessing")
 include_directories("../cpp")
+include_directories("../detector_2d")
 include_directories("..")
 include_directories(".")
 include_directories(${NumPy_INCLUDE_DIRS})
 
-add_cython_target(detector_2d
-    "detector_2d.pyx"
-    # "../coarse_pupil.pxd"
-    # "../c_types_wrapper.pxd"
-    "../cpp/singleeyefitter/ImageProcessing/cvx.cpp"
-    "../cpp/singleeyefitter/utils.cpp"
-    "../cpp/singleeyefitter/detectorUtils.cpp"
-    CXX PY3)
-add_library(detector_2d MODULE ${detector_2d})
+add_cython_target(detector_2d CXX PY3)
+add_library(detector_2d MODULE)
+target_sources(detector_2d PUBLIC ${detector_2d})
+target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/detectorUtils.cpp")
+target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/utils.cpp")
+target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/ImageProcessing/cvx.cpp")
 python_extension_module(detector_2d)
 target_link_libraries(detector_2d ${OpenCV_LIBS})
 target_link_libraries(detector_2d Eigen3::Eigen)
