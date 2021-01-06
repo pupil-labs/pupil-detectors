@@ -21,7 +21,11 @@ jobs:
         exclude:
           # Exclude Python versions older than 3.9 from macOS 11.0 (Big Sur)
           - os: macos-11.0
-            python-version: ["3.6", "3.7", "3.8"]
+            python-version: "3.6"
+          - os: macos-11.0
+            python-version: "3.7"
+          - os: macos-11.0
+            python-version: "3.8"
     continue-on-error: true
     runs-on: ${{ matrix.os }}
     steps:
