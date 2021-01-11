@@ -17,8 +17,8 @@ on:
         required: false
       should_invalidate_cache_build:
         description: "Fill to invalidate build cache"
-        default: ""
-        required: true
+        default: "true"
+        required: false
 
 env:
   opencv-download-url: "https://github.com/opencv/opencv/archive/4.2.0.zip"
