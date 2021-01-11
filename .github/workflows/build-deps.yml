@@ -72,6 +72,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX="${{ env.opencv-install-dir }}" \
           -DBUILD_LIST="core,highgui,videoio,imgcodecs,imgproc,video" \
+          -DBUILD_SHARED_LIBS=OFF\
           -DBUILD_opencv_world=ON \
           -DBUILD_EXAMPLES=OFF \
           -DBUILD_DOCS=OFF \
