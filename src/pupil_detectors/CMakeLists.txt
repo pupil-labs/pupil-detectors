@@ -38,7 +38,16 @@ include_directories(${NumPy_INCLUDE_DIRS})
 add_cython_target(detector_base CXX PY3)
 add_library(detector_base MODULE ${detector_base})
 python_extension_module(detector_base)
-target_link_libraries(detector_base ${OpenCV_LIBS} "-static")
+
+find_library(
+    OpenCV_LIBS_STATIC
+    ${OpenCV_LIBS}
+    PATHS
+    ${OpenCV_INSTALL_PATH}${PYTHON_SEPARATOR}lib
+    NO_DEFAULT_PATH
+)
+
+target_link_libraries(detector_base ${OpenCV_LIBS_STATIC})
 target_link_libraries(detector_base Eigen3::Eigen)
 
 add_subdirectory(detector_2d)
