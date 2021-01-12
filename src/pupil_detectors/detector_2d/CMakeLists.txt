@@ -48,7 +48,7 @@ target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/detectorUtils.cpp")
 target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/utils.cpp")
 target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/ImageProcessing/cvx.cpp")
 python_extension_module(detector_2d)
-target_link_libraries(detector_2d ${OpenCV_LIBS})
+target_link_libraries(detector_2d ${OpenCV_LIBS} "-static")
 target_link_libraries(detector_2d Eigen3::Eigen)
 
 install(TARGETS detector_2d LIBRARY DESTINATION "detector_2d")
