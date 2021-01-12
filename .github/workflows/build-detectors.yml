@@ -20,7 +20,7 @@ jobs:
     name: "build (py${{ matrix.python-version }} on ${{ matrix.os }})"
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-10.15, macos-11.0, windows-latest]
+        os: [macos-10.15, macos-11.0, windows-latest]
         python-version: ["3.6", "3.7", "3.8", "3.9"]
         exclude:
           # Exclude Python versions older than 3.9 from macOS 11.0 (Big Sur)
@@ -111,3 +111,16 @@ jobs:
             _skbuild
             dist
             raw_wheels
+
+  build_detectors_manylinux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build manylinux Python wheels
+        uses: RalfG/python-wheels-manylinux-build@v0.3.3-manylinux2010_x86_64
+        with:
+          python-versions: 'cp36-cp36m cp37-cp37m cp38-cp38m cp39-cp39m'
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pupil-detectors-dist-manylinux
+          path: ./dist/*
