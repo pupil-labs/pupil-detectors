@@ -27,28 +27,10 @@ endif ()
 
 find_package(PythonExtensions REQUIRED)
 find_package(Cython REQUIRED)
-find_package(NumPy REQUIRED)
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-find_package(OpenCV REQUIRED)
-
-include_directories("cpp/shared/include")
-include_directories("cpp/singleeyefitter")
-include_directories(${NumPy_INCLUDE_DIRS})
 
 add_cython_target(detector_base CXX PY3)
 add_library(detector_base MODULE ${detector_base})
 python_extension_module(detector_base)
-
-find_library(
-    OpenCV_LIBS_STATIC
-    ${OpenCV_LIBS}
-    PATHS
-    ${OpenCV_INSTALL_PATH}${PYTHON_SEPARATOR}lib
-    NO_DEFAULT_PATH
-)
-
-target_link_libraries(detector_base ${OpenCV_LIBS_STATIC})
-target_link_libraries(detector_base Eigen3::Eigen)
 
 add_subdirectory(detector_2d)
 
