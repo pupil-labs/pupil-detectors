@@ -11,6 +11,10 @@ env:
   opencv-install-dir: ${{ github.workspace }}/opencv-build
   eigen-install-dir: ${{ github.workspace }}/eigen-build
 
+  # Used for correct cache retrieval
+  opencv-download-url: "https://github.com/opencv/opencv/archive/4.2.0.zip"
+  eigen-download-url: "https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.zip"
+
 jobs:
   build_detectors:
     name: "build (py${{ matrix.python-version }} on ${{ matrix.os }})"
