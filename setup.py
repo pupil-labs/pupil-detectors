@@ -102,19 +102,33 @@ if platform.system() == "Windows":
     include_dirs.append(f"{EIGEN}")
 
 else:
-    # Opencv
-    opencv_include_dirs = [
-        "/usr/local/opt/opencv/include",  # old opencv brew (v3)
-        "/usr/local/opt/opencv@3/include",  # new opencv@3 brew
-        "/usr/local/include/opencv4",  # new opencv brew (v4)
-        "/usr/include/opencv4",  # opencv (v4) on ubuntu 20.04
-    ]
-    opencv_library_dirs = [
-        "/usr/local/opt/opencv/lib",  # old opencv brew (v3)
-        "/usr/local/opt/opencv@3/lib",  # new opencv@3 brew
-        "/usr/local/lib",  # new opencv brew (v4)
-        "/usr/lib",  # opencv (v4) on ubuntu 20.04
-    ]
+    # Check for anaconda / miniconda install
+    if 'conda' in os.__file__:
+        is_conda = True
+        path_list = os.__file__.split(os.sep)
+        env_i = path_list.index('lib')
+        conda_path = os.path.join(os.sep, *path_list[:env_i])
+        print("Using opencv / eigen3 headers from anaconda")
+        opencv_include_dirs = [os.path.join(conda_path, 'include/opencv4')]
+        if not os.path.exists(opencv_include_dirs[0]):
+            print(("Missing opencv headers - please install opencv in this conda\n"
+                   "environment to enable compilation of pupil_detectors binaries\n"
+                   "call: `conda install -c conda-forge opencv`\n"))
+        opencv_library_dirs = [os.path.join(conda_path, 'lib')]
+    else:
+        # Opencv
+        opencv_include_dirs = [
+            "/usr/local/opt/opencv/include",  # old opencv brew (v3)
+            "/usr/local/opt/opencv@3/include",  # new opencv@3 brew
+            "/usr/local/include/opencv4",  # new opencv brew (v4)
+            "/usr/include/opencv4",  # opencv (v4) on ubuntu 20.04
+        ]
+        opencv_library_dirs = [
+            "/usr/local/opt/opencv/lib",  # old opencv brew (v3)
+            "/usr/local/opt/opencv@3/lib",  # new opencv@3 brew
+            "/usr/local/lib",  # new opencv brew (v4)
+            "/usr/lib",  # opencv (v4) on ubuntu 20.04
+        ]
     opencv_libraries = [
         "opencv_core",
         "opencv_highgui",
@@ -142,11 +156,20 @@ else:
     library_dirs += opencv_library_dirs
     libraries += opencv_libraries
 
-    # Eigen
-    include_dirs += [
-        "/usr/local/include/eigen3",
-        "/usr/include/eigen3",
-    ]
+    if is_conda:
+        eigen_path = os.path.join(conda_path, 'include/eigen3')
+        if not os.path.exists(eigen_path):
+            print(("Missing eigen3 library - please install eigen3 in this conda\n"
+                   "environment to enable compilation of pupil_detectors binaries\n"
+                   "call: `conda install -c omnia eigen3`\n"))
+
+        include_dirs += [eigen_path]
+    else:
+        # Eigen
+        include_dirs += [
+            "/usr/local/include/eigen3",
+            "/usr/include/eigen3",
+        ]
 
 ########################################################################################
 # Setup Compile Args
