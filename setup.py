@@ -103,12 +103,10 @@ if platform.system() == "Windows":
 
 else:
     # Check for anaconda / miniconda install
-    if 'conda' in os.__file__:
-        is_conda = True
-        path_list = os.__file__.split(os.sep)
-        env_i = path_list.index('lib')
-        conda_path = os.path.join(os.sep, *path_list[:env_i])
+    is_conda = 'CONDA_PREFIX' in os.environ
+    if is_conda:
         print("Using opencv / eigen3 headers from anaconda")
+        conda_path = os.environ['CONDA_PREFIX']
         opencv_include_dirs = [os.path.join(conda_path, 'include/opencv4')]
         if not os.path.exists(opencv_include_dirs[0]):
             print(("Missing opencv headers - please install opencv in this conda\n"
