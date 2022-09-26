@@ -16,4 +16,3 @@ namespace singleeyefitter {
 
 
 #endif /* end of include guard: CONSTANTS_H__ */
-

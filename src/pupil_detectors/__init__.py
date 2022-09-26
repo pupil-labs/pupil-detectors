@@ -9,8 +9,8 @@ except PackageNotFoundError:
     # package is not installed
     pass
 
-from .roi import Roi
-from .detector_base import DetectorBase
 from .detector_2d import Detector2D
+from .detector_base import DetectorBase
+from .roi import Roi
 
 __all__ = ["__version__", "DetectorBase", "Detector2D", "Roi"]

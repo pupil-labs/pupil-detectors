@@ -31,5 +31,3 @@ All modifications to Lech Swirskis work have been made by Members of the
 Pupil Labs Dev Team and are distributed under the LGPLv3 Licencse of the Pupil
 Project. A copy of the license can be found here:
 https://github.com/pupil-labs/pupil/blob/master/COPYING.md
-
-

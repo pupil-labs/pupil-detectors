@@ -10,7 +10,9 @@ See COPYING and COPYING.LESSER for license details.
 """
 
 cimport cython
+
 import math
+
 
 cdef struct point_t :
    int    r

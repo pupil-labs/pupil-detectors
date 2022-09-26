@@ -68,14 +68,14 @@ namespace singleeyefitter {
         double timestamp = 0.0;
         int image_width = 0;
         int image_height = 0;
-        
+
         Detector2DResult() = default;
 
         public:
         std::string serialize()
         {
             std::stringstream ss;
-        
+
             ss.write(reinterpret_cast<const char*>(&confidence), sizeof(double));
 
             ss.write(reinterpret_cast<const char*>(&timestamp), sizeof(double));
