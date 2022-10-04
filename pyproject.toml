@@ -34,4 +34,4 @@ before-all = ["yum install -y eigen3-devel", "bash scripts/manylinux-before-all.
 
 [tool.cibuildwheel.windows]
 before-all = ["choco install eigen opencv"]
-environment = { OpenCV_DIR="c:\tools" }
+environment = { OpenCV_DIR="c:/tools/opencv/build" }

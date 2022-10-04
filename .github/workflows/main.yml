@@ -30,7 +30,7 @@ jobs:
         with:
           submodules: true
       - name: Build ${{ matrix.CIBW_BUILD }} wheels on ${{ matrix.os }}
-        uses: pypa/cibuildwheel@v2.9.0
+        uses: pypa/cibuildwheel@v2.10.2
         env:
           CIBW_BUILD: ${{ matrix.CIBW_BUILD }}
 
