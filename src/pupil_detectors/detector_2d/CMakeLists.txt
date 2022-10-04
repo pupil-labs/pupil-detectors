@@ -31,7 +31,7 @@ find_package(PythonExtensions REQUIRED)
 find_package(Cython REQUIRED)
 find_package(NumPy REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED core imgproc) # add highgui to use imshow/waitKey
 
 include_directories("../cpp/shared/include")
 include_directories("../cpp/singleeyefitter")
