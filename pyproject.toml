@@ -30,7 +30,7 @@ manylinux-x86_64-image = "manylinux2014"
 before-all = ["brew install eigen opencv"]
 
 [tool.cibuildwheel.linux]
-before-all = ["yum install -y eigen3-devel opencv-devel"]
+before-all = ["yum install -y eigen3-devel", "bash scripts/manylinux-before-all.sh"]
 
 [tool.cibuildwheel.windows]
 before-all = ["choco install eigen opencv"]

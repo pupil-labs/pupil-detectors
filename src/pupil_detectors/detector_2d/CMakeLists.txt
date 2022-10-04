@@ -42,6 +42,7 @@ include_directories("..")
 include_directories(".")
 
 include_directories(${NumPy_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 add_cython_target(detector_2d CXX PY3)
 add_library(detector_2d MODULE)
