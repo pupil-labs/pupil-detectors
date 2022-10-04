@@ -4,5 +4,5 @@ cd opencv
 mkdir build
 cd build
 cmake .. -DBUILD_LIST=core,imgproc
-cmake --build . -j
+cmake --build .
 cmake --install .
