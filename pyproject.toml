@@ -6,18 +6,31 @@ requires = [
     "scikit-build",
     "cmake",
     "ninja",
-    "numpy",                       # need to link against numpy
+    "numpy",
     "cython",
 ]
 build-backend = "setuptools.build_meta"
 
-[tool.black]
-skip-string-normalization = false
-
 [tool.setuptools_scm]
 
-[pytest.enabler.mypy]
-addopts = "--mypy"
+[tool.cibuildwheel]
+archs = ["native"]
+skip = "{cp,pp}27-* {cp,pp}35-* pp*"
 
-[pytest.enabler.cov]
-addopts = "--cov"
+build-frontend = "build"
+
+test-command = "pytest {package}/tests -v"
+before-test = ""
+test-requires = ["pytest"]
+test-extras = []
+
+manylinux-x86_64-image = "manylinux2014"
+
+[tool.cibuildwheel.macos]
+before-all = ["brew install eigen opencv"]
+
+[tool.cibuildwheel.linux]
+before-all = ["yum install -y eigen3-devel opencv-devel"]
+
+[tool.cibuildwheel.windows]
+before-all = ["choco install eigen opencv"]
