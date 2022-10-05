@@ -74,7 +74,15 @@ Developers
 Building from Source
 ********************
 
-TODO: Add dependency requirements
+Installing the dependencies
+===========================
+
+- macOS: ``brew install eigen opencv``
+- Windows: ``choco install eigen opencv``
+- Ubuntu: ``apt-get install libeigen3-dev libeigen3-dev``
+
+Building the Python package
+===========================
 
 .. code-block:: bash
 
