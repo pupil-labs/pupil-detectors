@@ -7,6 +7,24 @@ project("pupil_detector_2d"
     HOMEPAGE_URL "https://github.com/pupil-labs/pupil-detectors"
 )
 
+function(dump_cmake_variables)
+    get_cmake_property(_variableNames VARIABLES)
+    list(SORT _variableNames)
+
+    foreach(_variableName ${_variableNames})
+        if(ARGV0)
+            unset(MATCHED)
+            string(REGEX MATCH ${ARGV0} MATCHED ${_variableName})
+
+            if(NOT MATCHED)
+                continue()
+            endif()
+        endif()
+
+        message(STATUS "${_variableName}=${${_variableName}}")
+    endforeach()
+endfunction()
+
 # OpenCV 4 requires at least C++11, but we should be fine even selecting C++17 now
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -37,25 +55,27 @@ find_package(NumPy REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(OpenCV REQUIRED core imgproc) # add highgui to use imshow/waitKey
 
-include_directories("../cpp/shared/include")
-include_directories("../cpp/singleeyefitter")
-include_directories("../cpp/singleeyefitter/ImageProcessing")
-include_directories("../cpp")
-include_directories("../detector_2d")
-include_directories("..")
-include_directories(".")
-
-include_directories(${NumPy_INCLUDE_DIRS})
-include_directories(${OpenCV_INCLUDE_DIRS})
-include_directories(${Eigen3_INCLUDE_DIRS})
+dump_cmake_variables()
 
 add_cython_target(detector_2d CXX PY3)
 add_library(detector_2d MODULE)
-target_sources(detector_2d PUBLIC ${detector_2d})
-target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/detectorUtils.cpp")
-target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/utils.cpp")
-target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/ImageProcessing/cvx.cpp")
 python_extension_module(detector_2d)
+
+target_sources(detector_2d PUBLIC
+    ${detector_2d}
+    "../cpp/singleeyefitter/detectorUtils.cpp"
+    "../cpp/singleeyefitter/utils.cpp"
+    "../cpp/singleeyefitter/ImageProcessing/cvx.cpp"
+)
+
+target_include_directories(detector_2d PUBLIC
+    ${NumPy_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
+    ${Eigen3_INCLUDE_DIRS}
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../cpp/shared/include
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../cpp/singleeyefitter
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../cpp/singleeyefitter/ImageProcessing
+)
 
 target_link_libraries(detector_2d ${OpenCV_LIBS})
 target_link_libraries(detector_2d ${Eigen3_LIBS})
