@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.24)
 cmake_policy(SET CMP0076 NEW)
 
-project("pupil_detectors")
+project("pupil_detector_2d"
+    LANGUAGES CXX
+    DESCRIPTION "Pupil Labs 2D Pupil Detector"
+    HOMEPAGE_URL "https://github.com/pupil-labs/pupil-detectors"
+)
 
 # OpenCV 4 requires at least C++11, but we should be fine even selecting C++17 now
 set(CMAKE_CXX_STANDARD 17)
