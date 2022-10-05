@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project("pupil_detector_base"
-    LANGUAGES CXX
+    LANGUAGES C CXX
     DESCRIPTION "Pupil Labs Base Pupil Detector"
     HOMEPAGE_URL "https://github.com/pupil-labs/pupil-detectors"
 )

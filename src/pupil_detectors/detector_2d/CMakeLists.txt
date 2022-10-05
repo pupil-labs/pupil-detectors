@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 cmake_policy(SET CMP0076 NEW)
 
 project("pupil_detector_2d"
-    LANGUAGES CXX
+    LANGUAGES C CXX
     DESCRIPTION "Pupil Labs 2D Pupil Detector"
     HOMEPAGE_URL "https://github.com/pupil-labs/pupil-detectors"
 )
