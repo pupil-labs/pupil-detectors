@@ -36,4 +36,4 @@ before-all = ["yum install -y eigen3-devel", "bash scripts/manylinux-before-all.
 before-all = ["choco install eigen opencv"]
 environment = { OpenCV_DIR="c:/tools/opencv/build" }
 before-build = "pip install delvewheel"
-repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel} --add-path C:\tools\opencv\build\x64\vc15\bin"
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel} --add-path C:/tools/opencv/build/x64/vc15/bin"
