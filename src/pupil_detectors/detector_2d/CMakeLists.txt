@@ -43,6 +43,7 @@ include_directories(".")
 
 include_directories(${NumPy_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${Eigen3_INCLUDE_DIRS})
 
 add_cython_target(detector_2d CXX PY3)
 add_library(detector_2d MODULE)
@@ -53,6 +54,6 @@ target_sources(detector_2d PUBLIC "../cpp/singleeyefitter/ImageProcessing/cvx.cp
 python_extension_module(detector_2d)
 
 target_link_libraries(detector_2d ${OpenCV_LIBS})
-target_link_libraries(detector_2d Eigen3::Eigen)
+target_link_libraries(detector_2d ${Eigen3_LIBS})
 
 install(TARGETS detector_2d LIBRARY DESTINATION "detector_2d")
