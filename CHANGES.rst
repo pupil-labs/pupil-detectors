@@ -1,4 +1,4 @@
-2.0.2 (2022-10-05)
+2.0.2 (2022-10-06)
 ##################
 
 - Update project structure and build wheels with cibuildwheel
