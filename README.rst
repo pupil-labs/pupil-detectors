@@ -24,7 +24,8 @@
 pupil-detectors
 ***************
 
-This Python package contains the standalone 2D pupil detectors for the [Pupil-Labs](https://pupil-labs.com/) software stack.
+This Python package contains the standalone 2D pupil detectors for the
+`Pupil Core <https://github.com/pupil-labs/pupil/>`__ software stack.
 
 Install via PyPI
 ################
@@ -90,5 +91,5 @@ Building the Python package
    git clone git@github.com:pupil-labs/pupil-detectors.git
    cd pupil-detectors
 
-   # Install from source with development extras
+   # Install from source
    pip install .
