@@ -13,11 +13,11 @@ import typing as T
 
 import cv2
 import numpy as np
+
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport shared_ptr
 from numpy.math cimport PI
 
-from ..coarse_pupil cimport center_surround
 from ..c_types_wrapper cimport (
     CV_8UC1,
     CV_8UC3,
@@ -26,7 +26,9 @@ from ..c_types_wrapper cimport (
     Mat,
     Rect_,
 )
+from ..coarse_pupil cimport center_surround
 from ..detector_base cimport DetectorBase
+
 from ..roi import Roi
 
 
@@ -96,7 +98,7 @@ cdef class Detector2DCore(DetectorBase):
         **kwargs
     ) -> T.Dict[str, T.Any]:
         """Detect pupil location in input image.
-        
+
         Parameters:
             gray_img: input image as 2D numpy array (grayscale)
             color_img (optional): 3D numpy array (BGR)
@@ -141,7 +143,7 @@ cdef class Detector2DCore(DetectorBase):
         if should_visualize:
             color_img_data = color_img
             frameColor = Mat(image_height, image_width, CV_8UC3, <void *> &color_img_data[0, 0, 0])
-        
+
         if roi is None:
             roi = Roi.from_rect(0, 0, image_width, image_height)
 

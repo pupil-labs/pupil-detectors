@@ -11,10 +11,7 @@ See COPYING and COPYING.LESSER for license details.
 """
 from libcpp.memory cimport shared_ptr
 
-from ..c_types_wrapper cimport (
-    Detector2D,
-    Detector2DResult,
-)
+from ..c_types_wrapper cimport Detector2D, Detector2DResult
 from ..detector_base cimport DetectorBase
 
 

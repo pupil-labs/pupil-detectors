@@ -36,7 +36,10 @@ class Roi:
         return self.x_min, self.y_min, self.width, self.height
 
     def __str__(self) -> str:
-        return f"ROI(x_min={self.x_min}, y_min={self.y_min}, x_max={self.x_max}, y_max={self.y_max})"
+        return (
+            f"ROI(x_min={self.x_min}, y_min={self.y_min}, x_max={self.x_max}, "
+            f"y_max={self.y_max})"
+        )
 
     @staticmethod
     def from_slices(x_slice: slice, y_slice: slice) -> "Roi":

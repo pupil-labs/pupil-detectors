@@ -22,7 +22,7 @@ cdef class DetectorBase:
 
     def __init__(self, properties:T.Optional[DetectorProperties]=None):
         """Construct a new detector.
-        
+
         Parameters:
             properties (optional): dict of property names and values
         """
@@ -30,7 +30,7 @@ cdef class DetectorBase:
 
     def detect(self, gray_img: np.nparray, **kwargs) -> T.Dict[str, T.Any]:
         """Detect pupil location in input image.
-        
+
         Parameters:
             gray_img: input image as 2D numpy array (grayscale)
 
@@ -62,7 +62,7 @@ cdef class TemporalDetectorBase(DetectorBase):
         **kwargs
     ) -> T.Dict[str, T.Any]:
         """Detect pupil location in input image.
-        
+
         Parameters:
             gray_img: input image as 2D numpy array (grayscale)
             timestamp: timing information for correlating sequential images

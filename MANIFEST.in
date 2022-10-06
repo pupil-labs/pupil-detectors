@@ -6,12 +6,8 @@ include CHANGELOG.md
 include COPYING
 include COPYING.LESSER
 
-# include all cython files as well as the 2D detector hpp
-recursive-include src/pupil_detectors *.pxd *.pyx *.hpp
-
-# c++ requirements
-graft src/shared_cpp
-graft src/singleeyefitter
+# include all cython and c++ files
+recursive-include src/pupil_detectors *.pxd *.pyx *.hpp *cpp
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
